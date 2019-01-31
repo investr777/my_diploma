@@ -17,14 +17,14 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    public void addUser(User user) {
+    public User addUser(User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
-            return;
+            return user;
         }
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public Iterable<User> getUsers(){
+    public Iterable<User> getUsers() {
         return userRepository.findAll();
     }
 

@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -24,21 +23,35 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     private String username;
 
     @Column(name = "password")
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role roles;
+    @Column(name = "fullName")
+    private String fullName;
 
-    public Role getRoles() {
-        return roles;
+    @Column(name = "address")
+    private String address;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setRoles(Role roles) {
-        this.roles = roles;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Long getId() {
@@ -51,6 +64,26 @@ public class User implements UserDetails {
 
     public String getUsername() {
         return username;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = PASSWORD_ENCODER.encode(password);
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override
@@ -75,18 +108,6 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(getRoles());
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = PASSWORD_ENCODER.encode(password);
+        return Collections.singleton(getRole());
     }
 }
