@@ -21,6 +21,29 @@ group = 'com.example.juridov'
 version = '1.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+mainClassName = "com.example.juridov.phone.PhoneApplication"
+
+task runApp(type: JavaExec) {
+    main = "-jar";
+    args "build/libs/runApp-1.0.1-SNAPSHOT.jar"
+}
+
+bootJar {
+    enabled=true
+    baseName = 'runApp'
+
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
+
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
