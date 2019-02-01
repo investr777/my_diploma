@@ -10,13 +10,16 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "Admin API", description = "Admin REST Controller API, registration a new subscriber")
+@Api(value = "Admin API", description = "Admin REST Controller API, manage phone numbers, subscribers and services")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
     private final UserService userService;
@@ -37,8 +40,26 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get list of a phone number with his subscriber", response = User.class)
-    @GetMapping
+    @RequestMapping(method = RequestMethod.GET)
     public List<Phone> getListPhoneNumber() {
         return phoneService.getFullListPhoneNumbers();
+    }
+
+    @ApiOperation(value = "Block phone or Active phone", response = Phone.class)
+    @RequestMapping(method = RequestMethod.PUT)
+    public Phone blockOrActivePhone(int phoneNumber) {
+        return phoneService.checkActiveOrBlock(phoneNumber);
+    }
+
+    @ApiOperation(value = "Find by phone number", response = Phone.class)
+    @RequestMapping(path = "/findByPhone", method = RequestMethod.GET)
+    public Phone findByPhoneNumber(int phoneNumber) {
+        return phoneService.getPhoneNumber(phoneNumber);
+    }
+
+    @ApiOperation(value = "Delete phone number", response = Phone.class)
+    @RequestMapping(path = "/delete", method = RequestMethod.DELETE)
+    public void deletePhoneNumber(int phoneNumber) {
+        phoneService.deletePhoneNumber(phoneNumber);
     }
 }
