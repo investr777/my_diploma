@@ -1,4 +1,4 @@
-package com.example.juridov.phone.controller;
+package com.example.juridov.phone.controller.admin;
 
 import com.example.juridov.phone.dto.UserAndPhoneDTO;
 import com.example.juridov.phone.entity.Phone;
@@ -19,14 +19,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "Admin API", description = "Admin REST Controller API, manage phone numbers, subscribers and services")
+@Api(value = "Admin API", description = "Admin REST Controller API, manage phone numbers and subscribers")
 @PreAuthorize("hasAuthority('ADMIN')")
-public class AdminController {
+public class PhoneAdminController {
     private final UserService userService;
     private final PhoneService phoneService;
 
     @Autowired
-    public AdminController(UserService userService, PhoneService phoneService) {
+    public PhoneAdminController(UserService userService, PhoneService phoneService) {
         this.userService = userService;
         this.phoneService = phoneService;
     }

@@ -2,8 +2,10 @@ package com.example.juridov.phone.bootstrap;
 
 import com.example.juridov.phone.entity.Phone;
 import com.example.juridov.phone.entity.Role;
+import com.example.juridov.phone.entity.Service;
 import com.example.juridov.phone.entity.User;
 import com.example.juridov.phone.repository.PhoneRepository;
+import com.example.juridov.phone.repository.ServiceRepository;
 import com.example.juridov.phone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -14,11 +16,13 @@ import org.springframework.stereotype.Component;
 public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedEvent> {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
+    private final ServiceRepository serviceRepository;
 
     @Autowired
-    public SpringJpaBootstrap(UserRepository userRepository, PhoneRepository phoneRepository) {
+    public SpringJpaBootstrap(UserRepository userRepository, PhoneRepository phoneRepository, ServiceRepository serviceRepository) {
         this.userRepository = userRepository;
         this.phoneRepository = phoneRepository;
+        this.serviceRepository = serviceRepository;
     }
 
     @Override
@@ -77,5 +81,12 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         phone3.setPhoneNumber(541236);
         phone3.setActive(true);
         phoneRepository.save(phone3);
+
+        //Add first service
+        Service service1 = new Service();
+        service1.setName("ani");
+        service1.setDescription("ani is automatic number identifier");
+        service1.setPrice(1.1);
+        serviceRepository.save(service1);
     }
 }
