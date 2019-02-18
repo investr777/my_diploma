@@ -31,13 +31,13 @@ public class ServiceService {
         if (serviceFromDB == null) {
             return null;
         }
-        if (serviceFromDB.getName() != null) {
+        if (service.getName() != null) {
             serviceFromDB.setName(service.getName());
         }
-        if (serviceFromDB.getDescription() != null) {
+        if (service.getDescription() != null) {
             serviceFromDB.setDescription(service.getDescription());
         }
-        if (serviceFromDB.getPrice() > 0.0) {
+        if (service.getPrice() > 0.0) {
             serviceFromDB.setPrice(service.getPrice());
         }
         return serviceRepository.save(serviceFromDB);

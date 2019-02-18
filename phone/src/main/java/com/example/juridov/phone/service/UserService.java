@@ -35,10 +35,10 @@ public class UserService implements UserDetailsService {
         if (userFromDB == null) {
             return null;
         }
-        if (userFromDB.getFullName() != null) {
+        if (user.getFullName() != null) {
             userFromDB.setFullName(user.getFullName());
         }
-        if (userFromDB.getAddress() != null) {
+        if (user.getAddress() != null) {
             userFromDB.setAddress(user.getAddress());
         }
         return userRepository.save(userFromDB);
