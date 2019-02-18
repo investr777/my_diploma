@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
@@ -17,6 +19,10 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    public List<User> getListUsers(){
+        return userRepository.findAll();
+    }
+
     public User addUser(User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             return user;
@@ -24,8 +30,29 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public Iterable<User> getUsers() {
-        return userRepository.findAll();
+    public User updateDataUser(User user, Long userId) {
+        User userFromDB = userRepository.findUserById(userId);
+        if (userFromDB == null) {
+            return null;
+        }
+        if (userFromDB.getFullName() != null) {
+            userFromDB.setFullName(user.getFullName());
+        }
+        if (userFromDB.getAddress() != null) {
+            userFromDB.setAddress(user.getAddress());
+        }
+        return userRepository.save(userFromDB);
+    }
+
+    public User updateUserPassword(String password, Long userId) {
+        User userFromDB = userRepository.findUserById(userId);
+        if (userFromDB == null) {
+            return null;
+        }
+        if (password != null) {
+            userFromDB.setPassword(password);
+        }
+        return userRepository.save(userFromDB);
     }
 
     @Override
