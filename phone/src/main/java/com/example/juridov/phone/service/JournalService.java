@@ -5,6 +5,7 @@ import com.example.juridov.phone.repository.JournalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,14 +22,14 @@ public class JournalService {
     }
 
     public List<Journal> getNotPaid() {
-        List<Journal> notPaid = null;
-        for (Journal journal : journalRepository.findAll()) {
+        List<Journal> notPaid = new ArrayList<>();
+        List<Journal> listFromDB = journalRepository.findAll();
+        for (Journal journal : listFromDB) {
             if (!journal.isPaid()) {
                 notPaid.add(journal);
             }
         }
         return notPaid;
-        //todo
     }
 
     public Journal addJournal(Journal journal, Long phoneId) {

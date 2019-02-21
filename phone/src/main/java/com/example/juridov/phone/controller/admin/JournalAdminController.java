@@ -40,4 +40,16 @@ public class JournalAdminController {
     public List<Journal> getNotPaidJournals() {
         return journalService.getNotPaid();
     }
+
+    @ApiOperation(value = "Update a journal", response = Journal.class)
+    @RequestMapping(path = "/{journalId}", method = RequestMethod.PUT)
+    public Journal updateJournal(@RequestBody Journal journal, @PathVariable Long journalId) {
+        return journalService.updateJournal(journal, journalId);
+    }
+
+    @ApiOperation(value = "Delete a journal", response = Journal.class)
+    @RequestMapping(path = "/{journalId}", method = RequestMethod.DELETE)
+    public void deleteJournal(@PathVariable Long journalId) {
+        journalService.deleteJournal(journalId);
+    }
 }

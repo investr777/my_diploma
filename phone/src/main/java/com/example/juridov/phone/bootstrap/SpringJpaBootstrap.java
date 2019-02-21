@@ -1,12 +1,7 @@
 package com.example.juridov.phone.bootstrap;
 
-import com.example.juridov.phone.entity.Phone;
-import com.example.juridov.phone.entity.Role;
-import com.example.juridov.phone.entity.Service;
-import com.example.juridov.phone.entity.User;
-import com.example.juridov.phone.repository.PhoneRepository;
-import com.example.juridov.phone.repository.ServiceRepository;
-import com.example.juridov.phone.repository.UserRepository;
+import com.example.juridov.phone.entity.*;
+import com.example.juridov.phone.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -17,12 +12,16 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final ServiceRepository serviceRepository;
+    private final JournalRepository journalRepository;
+    private final ServicePhoneRepository servicePhoneRepository;
 
     @Autowired
-    public SpringJpaBootstrap(UserRepository userRepository, PhoneRepository phoneRepository, ServiceRepository serviceRepository) {
+    public SpringJpaBootstrap(UserRepository userRepository, PhoneRepository phoneRepository, ServiceRepository serviceRepository, JournalRepository journalRepository, ServicePhoneRepository servicePhoneRepository) {
         this.userRepository = userRepository;
         this.phoneRepository = phoneRepository;
         this.serviceRepository = serviceRepository;
+        this.journalRepository = journalRepository;
+        this.servicePhoneRepository = servicePhoneRepository;
     }
 
     @Override
@@ -84,9 +83,68 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
 
         //Add first service
         Service service1 = new Service();
-        service1.setName("ani");
-        service1.setDescription("ani is automatic number identifier");
+        service1.setName("ANI");
+        service1.setDescription("ANI is automatic number identifier");
         service1.setPrice(1.1);
         serviceRepository.save(service1);
+
+        //Add second service
+        Service service2 = new Service();
+        service2.setName("Melody");
+        service2.setDescription("Melody instead of beeps");
+        service2.setPrice(2.5);
+        serviceRepository.save(service2);
+
+        //Add third service
+        Service service3 = new Service();
+        service3.setName("Hidden number");
+        service3.setDescription("Unknown number");
+        service3.setPrice(2.5);
+        serviceRepository.save(service3);
+
+        //Add first journal
+        Journal journal1 = new Journal();
+        journal1.setPhoneId(1L);
+        journal1.setPaid(true);
+        journal1.setFromDate(1546300800000L);
+        journal1.setToDate(1548892800000L);
+        journal1.setPrice(2.5);
+        journalRepository.save(journal1);
+
+        //Add second journal
+        Journal journal2 = new Journal();
+        journal2.setPhoneId(1L);
+        journal2.setPaid(false);
+        journal2.setFromDate(1548979200000L);
+        journal2.setToDate(1551312000000L);
+        journal2.setPrice(3.6);
+        journalRepository.save(journal2);
+
+        //Add third journal
+        Journal journal3 = new Journal();
+        journal3.setPhoneId(2L);
+        journal3.setPaid(false);
+        journal3.setFromDate(1546300800000L);
+        journal3.setToDate(1548892800000L);
+        journal3.setPrice(1.1);
+        journalRepository.save(journal3);
+
+        //Add first servicePhone
+        ServicePhone servicePhone1 = new ServicePhone();
+        servicePhone1.setPhoneId(1L);
+        servicePhone1.setServiceId(1L);
+        servicePhoneRepository.save(servicePhone1);
+
+        //Add first servicePhone
+        ServicePhone servicePhone2 = new ServicePhone();
+        servicePhone2.setPhoneId(1L);
+        servicePhone2.setServiceId(2L);
+        servicePhoneRepository.save(servicePhone2);
+
+        //Add first servicePhone
+        ServicePhone servicePhone3 = new ServicePhone();
+        servicePhone3.setPhoneId(2L);
+        servicePhone3.setServiceId(3L);
+        servicePhoneRepository.save(servicePhone3);
     }
 }
