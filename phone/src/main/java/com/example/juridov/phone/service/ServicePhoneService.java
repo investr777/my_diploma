@@ -20,5 +20,19 @@ public class ServicePhoneService {
         return servicePhoneRepository.findAll();
     }
 
+    public List<ServicePhone> getListOfPhone(Long phoneId) {
+        return servicePhoneRepository.findAllByPhoneId(phoneId);
+    }
 
+    public ServicePhone addServiceToPhone(ServicePhone servicePhone) {
+        return servicePhoneRepository.save(servicePhone);
+    }
+
+    public void deleteServiceFromPhone(Long servicePhoneId) {
+        ServicePhone servicePhoneFromDB = servicePhoneRepository.findServicePhoneById(servicePhoneId);
+        if (servicePhoneFromDB == null) {
+            return;
+        }
+        servicePhoneRepository.delete(servicePhoneFromDB);
+    }
 }
