@@ -52,4 +52,7 @@ public class PhoneService {
         return phoneRepository.save(phoneFromDB);
     }
 
+    public Phone getPhoneByUser(Long userId) {
+        return phoneRepository.findPhoneByUserId(userId);
+    }
 }

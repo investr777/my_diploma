@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +22,12 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getListUsers(){
+    public List<User> getListUsers() {
         return userRepository.findAll();
+    }
+
+    public User getUser(Long userId) {
+        return userRepository.findUserById(userId);
     }
 
     public User addUser(User user) {
@@ -44,13 +51,17 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userFromDB);
     }
 
-    public User updateUserPassword(String password, Long userId) {
+    public User updateUserPassword(String password, String oldPassword, Long userId) throws Exception {
         User userFromDB = userRepository.findUserById(userId);
         if (userFromDB == null) {
             return null;
         }
         if (password != null) {
-            userFromDB.setPassword(password);
+            if (BCrypt.checkpw(oldPassword, userFromDB.getPassword())) {
+                userFromDB.setPassword(password);
+            } else {
+                throw new Exception("Wrong old password!");
+            }
         }
         return userRepository.save(userFromDB);
     }

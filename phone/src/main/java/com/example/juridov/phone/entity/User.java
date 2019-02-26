@@ -35,6 +35,7 @@ public class User implements UserDetails {
     @Column(name = "address")
     private String address;
 
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
@@ -86,26 +87,31 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(getRole());
