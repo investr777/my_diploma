@@ -13,13 +13,13 @@ public class ServicePhone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Column(name = "id")
-    Long id;
+    private Long id;
 
     @Column(name = "phone_id")
-    Long phoneId;
+    private Long phoneId;
 
     @Column(name = "service_id")
-    Long serviceId;
+    private Long serviceId;
 
     public Long getId() {
         return id;

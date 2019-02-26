@@ -35,4 +35,13 @@ public class ServicePhoneService {
         }
         servicePhoneRepository.delete(servicePhoneFromDB);
     }
+
+    public void deleteServicePhone(Long serviceId) {
+        List<ServicePhone> servicePhones = getFullListPhoneService();
+        for (ServicePhone servicePhone : servicePhones) {
+            if (servicePhone.getServiceId() == serviceId) {
+                servicePhoneRepository.delete(servicePhone);
+            }
+        }
+    }
 }

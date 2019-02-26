@@ -11,6 +11,9 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
 
     @Autowired
+    private ServicePhoneService servicePhoneService;
+
+    @Autowired
     public ServiceService(ServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
@@ -49,5 +52,6 @@ public class ServiceService {
             return;
         }
         serviceRepository.delete(serviceFromDB);
+        servicePhoneService.deleteServicePhone(serviceId);
     }
 }
