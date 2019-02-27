@@ -32,6 +32,16 @@ public class JournalService {
         return notPaid;
     }
 
+    public List<Journal> getNotPaidByPhone(Long phoneId) {
+        List<Journal> notPaidByPhone = new ArrayList<>();
+        for (Journal journal : getNotPaid()) {
+            if (journal.getPhoneId() == phoneId) {
+                notPaidByPhone.add(journal);
+            }
+        }
+        return notPaidByPhone;
+    }
+
     public Journal addJournal(Journal journal, Long phoneId) {
         journal.setPhoneId(phoneId);
         return journalRepository.save(journal);
@@ -54,13 +64,17 @@ public class JournalService {
         return journalRepository.save(journalFromDB);
     }
 
-    public Journal setIsPaid(Long journalId) {
+    public Journal setIsPaid(Long journalId, Long phoneId) {
         Journal journalFromDB = journalRepository.findJournalById(journalId);
-        if (journalFromDB == null) {
+        if (journalFromDB.getPhoneId() == phoneId) {
+            if (journalFromDB == null) {
+                return null;
+            }
+            if (!journalFromDB.isPaid()) {
+                journalFromDB.setPaid(true);
+            }
+        } else {
             return null;
-        }
-        if (!journalFromDB.isPaid()) {
-            journalFromDB.setPaid(true);
         }
         return journalRepository.save(journalFromDB);
     }

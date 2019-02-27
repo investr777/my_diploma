@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,5 +36,19 @@ public class JournalUserController {
     public List<Journal> getListJournal(@AuthenticationPrincipal User user) {
         Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
         return journalService.getJournalsOfPhone(phoneId);
+    }
+
+    @ApiOperation(value = "Get a journal list of this phone without paid", response = Journal.class)
+    @RequestMapping(path = "/noPaid",method = RequestMethod.GET)
+    public List<Journal> getListJournalWithoutPaid(@AuthenticationPrincipal User user) {
+        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        return journalService.getNotPaidByPhone(phoneId);
+    }
+
+    @ApiOperation(value = "Pay the check", response = Journal.class)
+    @RequestMapping(path = "/{journalId}",method = RequestMethod.PUT)
+    public Journal PayTheCheck(@AuthenticationPrincipal User user, @PathVariable Long journalId) {
+        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        return journalService.setIsPaid(journalId, phoneId);
     }
 }
