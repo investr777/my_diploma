@@ -15,8 +15,9 @@ public class Journal {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "phone_id")
-    private Long phoneId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "phone_id")
+    private Phone phone;
 
     @Column(name = "fromDate")
     private Long fromDate;
@@ -38,19 +39,19 @@ public class Journal {
         this.id = id;
     }
 
-    public Long getPhoneId() {
-        return phoneId;
+    public Phone getPhone() {
+        return phone;
     }
 
-    public void setPhoneId(Long phoneId) {
-        this.phoneId = phoneId;
+    public void setPhone(Phone phone) {
+        this.phone = phone;
     }
 
     public Long getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(long fromDate) {
+    public void setFromDate(Long fromDate) {
         this.fromDate = fromDate;
     }
 
@@ -58,7 +59,7 @@ public class Journal {
         return toDate;
     }
 
-    public void setToDate(long toDate) {
+    public void setToDate(Long toDate) {
         this.toDate = toDate;
     }
 

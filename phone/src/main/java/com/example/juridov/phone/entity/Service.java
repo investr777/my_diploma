@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "service")
@@ -24,6 +25,18 @@ public class Service {
 
     @Column(name = "price")
     private double price;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "service", cascade = CascadeType.REMOVE)
+    private List<ServicePhone> servicePhones;
+
+    public List<ServicePhone> getServicePhones() {
+        return servicePhones;
+    }
+
+    public void setServicePhones(List<ServicePhone> servicePhones) {
+        this.servicePhones = servicePhones;
+    }
 
     public Long getId() {
         return id;

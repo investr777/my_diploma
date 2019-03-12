@@ -34,21 +34,21 @@ public class JournalUserController {
     @ApiOperation(value = "Get a journal list of this phone", response = Journal.class)
     @RequestMapping(method = RequestMethod.GET)
     public List<Journal> getListJournal(@AuthenticationPrincipal User user) {
-        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
         return journalService.getJournalsOfPhone(phoneId);
     }
 
     @ApiOperation(value = "Get a journal list of this phone without paid", response = Journal.class)
-    @RequestMapping(path = "/noPaid",method = RequestMethod.GET)
+    @RequestMapping(path = "/noPaid", method = RequestMethod.GET)
     public List<Journal> getListJournalWithoutPaid(@AuthenticationPrincipal User user) {
-        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
         return journalService.getNotPaidByPhone(phoneId);
     }
 
     @ApiOperation(value = "Pay the check", response = Journal.class)
-    @RequestMapping(path = "/{journalId}",method = RequestMethod.PUT)
+    @RequestMapping(path = "/{journalId}", method = RequestMethod.PUT)
     public Journal PayTheCheck(@AuthenticationPrincipal User user, @PathVariable Long journalId) {
-        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
         return journalService.setIsPaid(journalId, phoneId);
     }
 }

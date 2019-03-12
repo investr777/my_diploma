@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "phone")
@@ -22,8 +23,33 @@ public class Phone {
     @Column(name = "isActive")
     private boolean isActive = true;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "phone", cascade = CascadeType.REMOVE)
+    private List<Journal> journals;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "phone", cascade = CascadeType.REMOVE)
+    private List<ServicePhone> servicePhones;
+
+    public List<ServicePhone> getServicePhones() {
+        return servicePhones;
+    }
+
+    public void setServicePhones(List<ServicePhone> servicePhones) {
+        this.servicePhones = servicePhones;
+    }
+
+    public List<Journal> getJournals() {
+        return journals;
+    }
+
+    public void setJournals(List<Journal> journals) {
+        this.journals = journals;
+    }
 
     public Long getId() {
         return id;
@@ -49,11 +75,11 @@ public class Phone {
         isActive = active;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

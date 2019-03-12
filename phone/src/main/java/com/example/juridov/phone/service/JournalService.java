@@ -2,6 +2,7 @@ package com.example.juridov.phone.service;
 
 import com.example.juridov.phone.entity.Journal;
 import com.example.juridov.phone.repository.JournalRepository;
+import com.example.juridov.phone.repository.PhoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,12 @@ import java.util.List;
 @Service
 public class JournalService {
     private final JournalRepository journalRepository;
+    private final PhoneRepository phoneRepository;
 
     @Autowired
-    public JournalService(JournalRepository journalRepository) {
+    public JournalService(JournalRepository journalRepository, PhoneRepository phoneRepository) {
         this.journalRepository = journalRepository;
+        this.phoneRepository = phoneRepository;
     }
 
     public List<Journal> getJournalsOfPhone(Long phoneId) {
@@ -35,7 +38,7 @@ public class JournalService {
     public List<Journal> getNotPaidByPhone(Long phoneId) {
         List<Journal> notPaidByPhone = new ArrayList<>();
         for (Journal journal : getNotPaid()) {
-            if (journal.getPhoneId() == phoneId) {
+            if (journal.getPhone().getId() == phoneId) {
                 notPaidByPhone.add(journal);
             }
         }
@@ -43,7 +46,7 @@ public class JournalService {
     }
 
     public Journal addJournal(Journal journal, Long phoneId) {
-        journal.setPhoneId(phoneId);
+        journal.setPhone(phoneRepository.findPhoneById(phoneId));
         return journalRepository.save(journal);
     }
 
@@ -66,7 +69,7 @@ public class JournalService {
 
     public Journal setIsPaid(Long journalId, Long phoneId) {
         Journal journalFromDB = journalRepository.findJournalById(journalId);
-        if (journalFromDB.getPhoneId() == phoneId) {
+        if (journalFromDB.getPhone().getId() == phoneId) {
             if (journalFromDB == null) {
                 return null;
             }

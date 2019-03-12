@@ -1,6 +1,5 @@
 package com.example.juridov.phone.controller.admin;
 
-import com.example.juridov.phone.dto.UserAndPhoneDTO;
 import com.example.juridov.phone.entity.Phone;
 import com.example.juridov.phone.entity.User;
 import com.example.juridov.phone.service.PhoneService;
@@ -10,7 +9,10 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -28,18 +30,17 @@ public class PhoneAdminController {
         this.phoneService = phoneService;
     }
 
-    @ApiOperation(value = "Registration a new subscriber with his phone number", response = User.class)
-    @RequestMapping(path = "/registration", method = RequestMethod.POST)
-    public void addNewSubscriberWithPhone(@RequestBody UserAndPhoneDTO userAndPhoneDTO) {
-        Long userId = userService.addUser(userAndPhoneDTO.getUser()).getId();
-        userAndPhoneDTO.getPhone().setUserId(userId);
-        phoneService.addPhoneNumber(userAndPhoneDTO.getPhone());
-    }
-
     @ApiOperation(value = "Get list of a phone number with his subscriber", response = User.class)
     @RequestMapping(method = RequestMethod.GET)
     public List<Phone> getListPhoneNumber() {
         return phoneService.getFullListPhoneNumbers();
+    }
+
+    @ApiOperation(value = "Registration a new subscriber with his phone number", response = Phone.class)
+    @RequestMapping(path = "/registration", method = RequestMethod.POST)
+    public Phone addNewSubscriberWithPhone(@RequestBody Phone phone) {
+        userService.addUser(phone.getUser());
+        return phoneService.addPhoneNumber(phone);
     }
 
     @ApiOperation(value = "Block phone or Active phone", response = Phone.class)

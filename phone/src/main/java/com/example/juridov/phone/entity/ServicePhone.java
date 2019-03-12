@@ -15,11 +15,13 @@ public class ServicePhone {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "phone_id")
-    private Long phoneId;
+    @ManyToOne
+    @JoinColumn(name = "phone_id")
+    private Phone phone;
 
-    @Column(name = "service_id")
-    private Long serviceId;
+    @ManyToOne
+    @JoinColumn(name = "service_id")
+    private Service service;
 
     public Long getId() {
         return id;
@@ -29,19 +31,20 @@ public class ServicePhone {
         this.id = id;
     }
 
-    public Long getPhoneId() {
-        return phoneId;
+    public Phone getPhone() {
+        return phone;
     }
 
-    public void setPhoneId(Long phoneId) {
-        this.phoneId = phoneId;
+    public void setPhone(Phone phone) {
+        this.phone = phone;
     }
 
-    public Long getServiceId() {
-        return serviceId;
+    public Service getService() {
+        return service;
     }
 
-    public void setServiceId(Long serviceId) {
-        this.serviceId = serviceId;
+    public void setService(Service service) {
+        this.service = service;
     }
 }
+

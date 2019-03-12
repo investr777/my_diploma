@@ -1,6 +1,7 @@
 package com.example.juridov.phone.service;
 
 import com.example.juridov.phone.entity.ServicePhone;
+import com.example.juridov.phone.repository.PhoneRepository;
 import com.example.juridov.phone.repository.ServicePhoneRepository;
 import com.example.juridov.phone.repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,13 @@ import java.util.List;
 public class ServicePhoneService {
     private final ServicePhoneRepository servicePhoneRepository;
     private final ServiceRepository serviceRepository;
+    private final PhoneRepository phoneRepository;
 
     @Autowired
-    public ServicePhoneService(ServicePhoneRepository servicePhoneRepository, ServiceRepository serviceRepository) {
+    public ServicePhoneService(ServicePhoneRepository servicePhoneRepository, ServiceRepository serviceRepository, PhoneRepository phoneRepository) {
         this.servicePhoneRepository = servicePhoneRepository;
         this.serviceRepository = serviceRepository;
+        this.phoneRepository = phoneRepository;
     }
 
     public List<ServicePhone> getFullListPhoneService() {
@@ -32,13 +35,13 @@ public class ServicePhoneService {
             return null;
         }
         for (ServicePhone servicePhone : servicePhoneRepository.findAllByPhoneId(phoneId)) {
-            if (servicePhone.getServiceId() == serviceId) {
+            if (servicePhone.getService().getId() == serviceId) {
                 throw new Exception("Already connected");
             }
         }
         ServicePhone servicePhone = new ServicePhone();
-        servicePhone.setPhoneId(phoneId);
-        servicePhone.setServiceId(serviceId);
+        servicePhone.setPhone(phoneRepository.findPhoneById(phoneId));
+        servicePhone.setService(serviceRepository.findServiceById(serviceId));
         return servicePhoneRepository.save(servicePhone);
     }
 
@@ -57,7 +60,7 @@ public class ServicePhoneService {
     public void deleteServicePhone(Long serviceId) {
         List<ServicePhone> servicePhones = getFullListPhoneService();
         for (ServicePhone servicePhone : servicePhones) {
-            if (servicePhone.getServiceId() == serviceId) {
+            if (servicePhone.getService().getId() == serviceId) {
                 servicePhoneRepository.delete(servicePhone);
             }
         }

@@ -25,7 +25,7 @@ public class UserAdminController {
 
     @ApiOperation(value = "Get list users", response = User.class)
     @RequestMapping(method = RequestMethod.GET)
-    public List<User> getListUsers(){
+    public List<User> getListUsers() {
         return userService.getListUsers();
     }
 

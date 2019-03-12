@@ -34,10 +34,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests().antMatchers("/", "/login").permitAll()
-                .anyRequest().authenticated();
-
+//                .antMatchers("/admin/**").hasRole("ADMIN")
+//                .antMatchers("/user/**").hasRole("USER")
+                .anyRequest().authenticated()
+//                .and().formLogin()
+                .and().logout().logoutSuccessUrl("/");
         http.httpBasic().authenticationEntryPoint(getBasicAuthEntryPoint());
-
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 

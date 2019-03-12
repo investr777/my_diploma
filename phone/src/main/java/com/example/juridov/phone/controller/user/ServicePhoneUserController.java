@@ -34,21 +34,21 @@ public class ServicePhoneUserController {
     @ApiOperation(value = "Get a list services of this phone number", response = ServicePhone.class)
     @RequestMapping(method = RequestMethod.GET)
     public List<ServicePhone> getInformation(@AuthenticationPrincipal User user) {
-        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
         return servicePhoneService.getListOfPhone(phoneId);
     }
 
     @ApiOperation(value = "Add a new service to this phone", response = ServicePhone.class)
     @RequestMapping(path = "/{serviceId}", method = RequestMethod.POST)
     public ServicePhone addServiceToPhone(@AuthenticationPrincipal User user, @PathVariable Long serviceId) throws Exception {
-        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
         return servicePhoneService.addServiceToPhone(phoneId, serviceId);
     }
 
     @ApiOperation(value = "Delete a service from this phone", response = ServicePhone.class)
     @RequestMapping(path = "/{servicePhoneId}", method = RequestMethod.DELETE)
     public void deleteServiceFromPhone(@AuthenticationPrincipal User user, @PathVariable Long servicePhoneId) {
-        Long phoneId = phoneService.getPhoneByUser(user.getId()).getId();
+        Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
         servicePhoneService.deleteServiceFromPhone(servicePhoneId, phoneId);
     }
 }
