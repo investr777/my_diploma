@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "USER API", description = "User REST Controller API, manage this user and user's phone")
+@Api(value = "USER API", tags = "User REST Controller API, manage this user and user's phone")
 @PreAuthorize("hasAuthority('USER')")
 public class UserAndPhoneUserController {
     private final PhoneService phoneService;

@@ -13,7 +13,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "Admin API", description = "Admin REST Controller API, manage users")
+//@CrossOrigin(origins = "http://localhost:4200")
+@Api(value = "Admin API", tags = "Admin REST Controller API, manage users")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class UserAdminController {
     private final UserService userService;

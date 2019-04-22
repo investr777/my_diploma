@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/admin/servicePhone", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "Admin API", description = "Admin REST Controller API, show services of phone numbers")
+@Api(value = "Admin API", tags = "Admin REST Controller API, show services of phone numbers")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class ServicePhoneAdminController {
     private final ServicePhoneService servicePhoneService;

@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user/journal", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "USER API", description = "User REST Controller API, manage journals of this user")
+@Api(value = "USER API", tags = "User REST Controller API, manage journals of this user")
 @PreAuthorize("hasAuthority('USER')")
 public class JournalUserController {
     private final JournalService journalService;

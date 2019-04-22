@@ -32,20 +32,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-        http.authorizeRequests().antMatchers("/", "/login").permitAll()
-//                .antMatchers("/admin/**").hasRole("ADMIN")
-//                .antMatchers("/user/**").hasRole("USER")
+        http
+                .authorizeRequests()
+                .antMatchers("/", "/registration").permitAll()
                 .anyRequest().authenticated()
-//                .and().formLogin()
-                .and().logout().logoutSuccessUrl("/");
-        http.httpBasic().authenticationEntryPoint(getBasicAuthEntryPoint());
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .and()
+                .formLogin()
+                .permitAll()
+                .and()
+                .logout()
+                .permitAll();
     }
-
-    @Bean
-    public CustomBasicAuthenticationEntryPoint getBasicAuthEntryPoint() {
-        return new CustomBasicAuthenticationEntryPoint();
-    }
-
 }

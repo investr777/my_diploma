@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user/service", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "USER API", description = "User REST Controller API, manage services of this phone")
+@Api(value = "USER API", tags = "User REST Controller API, manage services of this phone")
 @PreAuthorize("hasAuthority('USER')")
 public class ServicePhoneUserController {
     private final ServicePhoneService servicePhoneService;

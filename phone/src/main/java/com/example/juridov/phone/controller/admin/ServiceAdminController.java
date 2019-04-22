@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/admin/service", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "Admin API", description = "Admin REST Controller API, manage services")
+@Api(value = "Admin API", tags = "Admin REST Controller API, manage services")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class ServiceAdminController {
     private final ServiceService serviceService;
