@@ -38,11 +38,6 @@ Vue.component('services-list', {
         '<tr is="service-row" v-for="service in services" :key="service.id" :service="service"></tr>' +
         '</tbody>' +
         '</table>',
-    created: function () {
-        ServiceApi.get().then(result =>
-    result.json().then(data =>
-    data.forEach(service => this.services.push(service))))
-    }
 });
 
 var app = new Vue({
@@ -54,5 +49,10 @@ var app = new Vue({
         '<footer-form/></div>',
     data: {
         services: []
+    },
+    created: function () {
+        ServiceApi.get().then(result =>
+        result.json().then(data =>
+        data.forEach(service => this.services.push(service))))
     }
 });
