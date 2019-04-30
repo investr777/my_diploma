@@ -66,19 +66,30 @@ Vue.component('phone-row', {
         '<td>{{phone.user.address}}</td>' +
         '<td>{{phone.phoneNumber}}</td>' +
         '<td>{{phone.active}}</td>' +
-        '</tr>'
+        '<td><input type="button" value="X" @click="del" /></td>' +
+        '</tr>',
+    methods: {
+        del: function() {
+            messageApi.remove({id: this.message.id}).then(result => {
+                if (result.ok) {
+                    this.messages.splice(this.messages.indexOf(this.message), 1)
+                }
+            })
+        }
+    }
 });
 
 Vue.component('phones-list', {
     template: '<table>' +
         '<thead>' +
-        '<th colspan="4">Наши абоненты</th>' +
+        '<th colspan="5">Наши абоненты</th>' +
         '</thead>' +
         '<thead>' +
         '<th>ФИО</th>' +
         '<th>Адрес</th>' +
         '<th>Номер телефона</th>' +
         '<th>Статус</th>' +
+        '<th>Действия</th>' +
         '</thead>' +
         '<tbody>' +
         '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone"></tr>' +
