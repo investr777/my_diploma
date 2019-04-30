@@ -9,10 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,9 +53,9 @@ public class PhoneAdminController {
     }
 
     @ApiOperation(value = "Delete phone number", response = Phone.class)
-    @RequestMapping(path = "/delete", method = RequestMethod.DELETE)
-    public void deletePhoneNumber(int phoneNumber) {
-        phoneService.deletePhoneNumber(phoneNumber);
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public void deletePhoneNumber(@PathVariable Long id) {
+        phoneService.deletePhoneNumber(id);
     }
 
 }

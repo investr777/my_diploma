@@ -31,8 +31,8 @@ public class PhoneService {
         return phoneRepository.findByPhoneNumber(phoneNumber);
     }
 
-    public void deletePhoneNumber(int phoneNumber) {
-        Phone phoneFromDB = phoneRepository.findByPhoneNumber(phoneNumber);
+    public void deletePhoneNumber(Long phoneId) {
+        Phone phoneFromDB = phoneRepository.findPhoneById(phoneId);
         if (phoneFromDB == null) {
             return;
         }

@@ -1,5 +1,5 @@
 var ServiceApi = Vue.resource('/services')
-var AdminApi = Vue.resource('/admin')
+var AdminApi = Vue.resource('/admin{/id}')
 var UserApi = Vue.resource('/user')
 
 Vue.component('header-form', {
@@ -10,10 +10,18 @@ Vue.component('header-form', {
         '</header>'
 });
 
-Vue.component('header-form-exit', {
+Vue.component('header-form-admin', {
     template: '<header>' +
         '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
-        '<a href="/"><img src="/img/logo.png"></a>' +
+        '<a href="/#/admin"><img src="/img/logo.png"></a>' +
+        '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
+        '</header>'
+});
+
+Vue.component('header-form-user', {
+    template: '<header>' +
+        '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
+        '<a href="/#/user"><img src="/img/logo.png"></a>' +
         '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
         '</header>'
 });
@@ -60,7 +68,7 @@ Vue.component('services-list', {
 });
 
 Vue.component('phone-row', {
-    props: ['phone'],
+    props: ['phone', 'phones'],
     template: '<tr>' +
         '<td>{{phone.user.fullName}}</td>' +
         '<td>{{phone.user.address}}</td>' +
@@ -70,9 +78,10 @@ Vue.component('phone-row', {
         '</tr>',
     methods: {
         del: function() {
-            messageApi.remove({id: this.message.id}).then(result => {
+            AdminApi.delete({id: this.phone.id})
+                .then(result => {
                 if (result.ok) {
-                    this.messages.splice(this.messages.indexOf(this.message), 1)
+                    this.phones.splice(this.phones.indexOf(this.phone), 1)
                 }
             })
         }
@@ -92,7 +101,7 @@ Vue.component('phones-list', {
         '<th>Действия</th>' +
         '</thead>' +
         '<tbody>' +
-        '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone"></tr>' +
+        '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone" :phones="phones"></tr>' +
         '</tbody>' +
         '</table>',
     data: function() {
@@ -144,7 +153,7 @@ Vue.component('users-list', {
 });
 
 const User = {
-    template: '<div><header-form-exit/>' +
+    template: '<div><header-form-user/>' +
         '<hr class="tab">' +
         '<br>' +
         '<users-list></users-list>' +
@@ -152,7 +161,7 @@ const User = {
 }
 
 const Admin = {
-    template: '<div><header-form-exit/>' +
+    template: '<div><header-form-admin/>' +
             '<hr class="tab">' +
             '<br>' +
             '<phones-list></phones-list>' +
