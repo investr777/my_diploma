@@ -24,7 +24,6 @@ Vue.component('service-row', {
 });
 
 Vue.component('services-list', {
-    props: ['services'],
     template: '<table>' +
         '<thead>' +
         '<th colspan="3">Наши услуги</th>' +
@@ -38,21 +37,45 @@ Vue.component('services-list', {
         '<tr is="service-row" v-for="service in services" :key="service.id" :service="service"></tr>' +
         '</tbody>' +
         '</table>',
-});
-
-var app = new Vue({
-    el: '#main',
-    template: '<div><header-form/>' +
-        '<hr class="tab">' +
-        '<br>' +
-        '<services-list :services="services"/>' +
-        '<footer-form/></div>',
-    data: {
-        services: []
+    data: function() {
+        return {
+            services: []
+        }
     },
     created: function () {
         ServiceApi.get().then(result =>
-        result.json().then(data =>
-        data.forEach(service => this.services.push(service))))
+            result.json().then(data =>
+                data.forEach(service => this.services.push(service))))
     }
+});
+
+const Foo = { template: '<div>foo</div>' }
+const Bar = { template:
+        '<div><header-form/>' +
+            '<hr class="tab">' +
+            '<br>' +
+            '<div>FOO</div>' +
+        '<footer-form/></div>'
+}
+const Main = {
+    template: '<div><header-form/>' +
+        '<hr class="tab">' +
+        '<br>' +
+        '<services-list/>' +
+        '<footer-form/></div>'
+}
+
+const routes = [
+    { path: '/foo', component: Foo },
+    { path: '/bar', component: Bar },
+    { path: '/', component: Main }
+]
+
+const router = new VueRouter({
+    routes
+})
+
+var app = new Vue({
+    el: '#main',
+    router: router
 });
