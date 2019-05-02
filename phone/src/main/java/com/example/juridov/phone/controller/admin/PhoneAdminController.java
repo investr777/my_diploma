@@ -34,7 +34,8 @@ public class PhoneAdminController {
     }
 
     @ApiOperation(value = "Registration a new subscriber with his phone number", response = Phone.class)
-    @RequestMapping(path = "/registration", method = RequestMethod.POST)
+//    @RequestMapping(path = "/registration", method = RequestMethod.POST)
+    @PostMapping
     public Phone addNewSubscriberWithPhone(@RequestBody Phone phone) {
         userService.addUser(phone.getUser());
         return phoneService.addPhoneNumber(phone);

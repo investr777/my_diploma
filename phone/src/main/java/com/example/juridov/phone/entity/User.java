@@ -19,14 +19,12 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @Column(name = "id")
     private Long id;
 
     @Column(name = "username", unique = true)
     private String username;
 
-    @JsonIgnore
     @Column(name = "password")
     private String password;
 
