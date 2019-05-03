@@ -27,7 +27,7 @@ public class PhoneService {
         return phoneRepository.save(phone);
     }
 
-    public Phone getPhoneNumber(int phoneNumber) {
+    public Phone getPhoneNumber(Integer phoneNumber) {
         return phoneRepository.findByPhoneNumber(phoneNumber);
     }
 
@@ -39,7 +39,22 @@ public class PhoneService {
         phoneRepository.delete(phoneFromDB);
     }
 
-    public Phone checkActiveOrBlock(int phoneNumber) {
+    public Phone updateDataPhone(Phone phone, Long phoneId) {
+        Phone phoneFromDB = phoneRepository.findPhoneById(phoneId);
+        if (phoneFromDB == null){
+            return null;
+        }
+        if (phone.getPhoneNumber() != null){
+            phoneFromDB.setPhoneNumber(phone.getPhoneNumber());
+        }
+        return phoneRepository.save(phoneFromDB);
+    }
+
+    public Phone findPhoneById(Long phoneId) {
+        return phoneRepository.findPhoneById(phoneId);
+    }
+
+    public Phone checkActiveOrBlock(Integer phoneNumber) {
         Phone phoneFromDB = phoneRepository.findByPhoneNumber(phoneNumber);
         if (phoneFromDB == null) {
             return null;

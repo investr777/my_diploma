@@ -4,7 +4,7 @@ import com.example.juridov.phone.entity.Phone;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PhoneRepository extends JpaRepository<Phone, Long> {
-    Phone findByPhoneNumber(int phoneNumber);
+    Phone findByPhoneNumber(Integer phoneNumber);
     Phone findPhoneByUserId(Long userId);
     Phone findPhoneById(Long phoneId);
 }

@@ -34,22 +34,28 @@ public class PhoneAdminController {
     }
 
     @ApiOperation(value = "Registration a new subscriber with his phone number", response = Phone.class)
-//    @RequestMapping(path = "/registration", method = RequestMethod.POST)
     @PostMapping
     public Phone addNewSubscriberWithPhone(@RequestBody Phone phone) {
         userService.addUser(phone.getUser());
         return phoneService.addPhoneNumber(phone);
     }
 
+    @ApiOperation(value = "Edit a subscriber with his phone number", response = Phone.class)
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
+    public Phone EditSubscriberWithPhone(@RequestBody Phone phone, @PathVariable Long id) {
+        userService.updateDataUser(phone.getUser(), phoneService.findPhoneById(id).getUser().getId());
+        return phoneService.updateDataPhone(phone, id);
+    }
+
     @ApiOperation(value = "Block phone or Active phone", response = Phone.class)
     @RequestMapping(method = RequestMethod.PUT)
-    public Phone blockOrActivePhone(int phoneNumber) {
+    public Phone blockOrActivePhone(Integer phoneNumber) {
         return phoneService.checkActiveOrBlock(phoneNumber);
     }
 
     @ApiOperation(value = "Find by phone number", response = Phone.class)
     @RequestMapping(path = "/findByPhone", method = RequestMethod.GET)
-    public Phone findByPhoneNumber(int phoneNumber) {
+    public Phone findByPhoneNumber(Integer phoneNumber) {
         return phoneService.getPhoneNumber(phoneNumber);
     }
 

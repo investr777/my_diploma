@@ -77,14 +77,14 @@ Vue.component('services-list', {
 });
 
 Vue.component('phone-row', {
-    props: ['phone', 'phones'],
+    props: ['phone', 'phones', 'editMethod'],
     template: '<tr>' +
         '<td>{{phone.user.fullName}}</td>' +
         '<td>{{phone.user.address}}</td>' +
         '<td>{{phone.phoneNumber}}</td>' +
         '<td>{{phone.active}}</td>' +
         '<td>' +
-            '<button onclick="location.href = \'/#/editUser/\'">Edit</button>' +
+            '<input type="button" value="Edit" @click="edit" />' +
             '<input type="button" value="X" @click="del" />' +
         '</td>' +
         '</tr>',
@@ -96,20 +96,34 @@ Vue.component('phone-row', {
                     this.phones.splice(this.phones.indexOf(this.phone), 1)
                 }
             })
+        },
+        edit: function () {
+            this.editMethod(this.phone);
         }
     }
 });
 
 Vue.component('add-user', {
-    props:['phones'],
+    props:['phones', 'phoneAttr'],
     data: function() {
         return {
+            id: '',
             username: '',
             password: '',
             fullName: '',
             address: '',
             phoneNumber: '',
-            preloaderVisibility: false
+            // preloaderVisibility: false
+        }
+    },
+    watch: {
+        phoneAttr: function(newVal, oldVal) {
+            this.id = newVal.id;
+            this.username = newVal.user.username;
+            this.password = newVal.user.password;
+            this.fullName = newVal.user.fullName;
+            this.address = newVal.user.address;
+            this.phoneNumber = newVal.phoneNumber;
         }
     },
     template:
@@ -118,6 +132,7 @@ Vue.component('add-user', {
             '<button class="button" @click="preloaderVisibility = true">Добавить абонента</button>' +
         '</div>' +
         '<table v-if="preloaderVisibility">' +
+        '<table>' +
             '<tr>' +
                 '<td>Логин</td>' +
                 '<td><input type="text" placeholder="Username" v-model="username"/></td>' +
@@ -148,18 +163,34 @@ Vue.component('add-user', {
                     address: this.address
                 }
             };
-            AdminApi.save({}, phone).then(result =>
-                result.json().then(data => {
-                        this.phones.push(data)
+
+            if (this.id){
+                AdminApi.update({id: this.id}, phone).then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.phones, data.id);
+                        this.phones.splice(index,1,data);
+                        this.id = ''
                         this.username = ''
                         this.password = ''
                         this.fullName = ''
                         this.address = ''
                         this.phoneNumber = ''
                         this.preloaderVisibility = false
-                    }
+                    }))
+            } else {
+                AdminApi.save({}, phone).then(result =>
+                    result.json().then(data => {
+                            this.phones.push(data)
+                            this.username = ''
+                            this.password = ''
+                            this.fullName = ''
+                            this.address = ''
+                            this.phoneNumber = ''
+                            this.preloaderVisibility = false
+                        }
+                    )
                 )
-            )
+            }
         }
     }
 })
@@ -167,7 +198,7 @@ Vue.component('add-user', {
 Vue.component('phones-list', {
     template:
         '<div>'+
-            '<add-user :phones="phones"/><br>' +
+            '<add-user :phones="phones" :phoneAttr="phone"/><br>' +
             '<table>' +
                 '<thead>' +
                     '<th colspan="5">Наши абоненты</th>' +
@@ -180,19 +211,27 @@ Vue.component('phones-list', {
                     '<th>Действия</th>' +
                 '</thead>' +
                 '<tbody>' +
-                    '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone" :phones="phones"></tr>' +
+                    '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone" ' +
+                    ':phones="phones" :editMethod="editMethod" :preloaderVisibility="preloaderVisibility"></tr>' +
                 '</tbody>' +
             '</table>' +
         '</div>',
     data: function() {
         return {
             phones: [],
+            phone: null,
+            preloaderVisibility: false
         }
     },
     created: function () {
         AdminApi.get().then(result =>
             result.json().then(data =>
                 data.forEach(phone => this.phones.push(phone))))
+    },
+    methods: {
+        editMethod: function(phone) {
+            this.phone = phone;
+        }
     }
 });
 
