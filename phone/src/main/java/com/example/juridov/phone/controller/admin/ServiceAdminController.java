@@ -30,20 +30,21 @@ public class ServiceAdminController {
     }
 
     @ApiOperation(value = "Add a new service", response = Service.class)
-    @RequestMapping(path = "/add", method = RequestMethod.POST)
+//    @RequestMapping(path = "/add", method = RequestMethod.POST)
+    @PostMapping
     public Service addService(@RequestBody Service service) {
         return serviceService.addService(service);
     }
 
     @ApiOperation(value = "Update a service", response = Service.class)
-    @RequestMapping(path = "/{serviceId}", method = RequestMethod.PUT)
-    public Service updateService(@RequestBody Service service, @PathVariable Long serviceId) {
-        return serviceService.updateService(service, serviceId);
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
+    public Service updateService(@RequestBody Service service, @PathVariable Long id) {
+        return serviceService.updateService(service, id);
     }
 
     @ApiOperation(value = "Delete a service", response = Service.class)
-    @RequestMapping(path = "/{serviceId}", method = RequestMethod.DELETE)
-    public void deleteService(@PathVariable Long serviceId) {
-        serviceService.deleteService(serviceId);
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public void deleteService(@PathVariable Long id) {
+        serviceService.deleteService(id);
     }
 }

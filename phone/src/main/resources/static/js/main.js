@@ -10,6 +10,7 @@ function getIndex(list, id) {
 var ServiceApi = Vue.resource('/services')
 var AdminApi = Vue.resource('/admin{/id}')
 var UserApi = Vue.resource('/user')
+var ServiceAdminApi = Vue.resource('/admin/service{/id}')
 
 Vue.component('header-form', {
     template: '<header>' +
@@ -41,52 +42,171 @@ Vue.component('footer-form', {
         '</div>'
 });
 
-Vue.component('service-row', {
-    props: ['service'],
-    template: '<tr>' +
-        '<td>{{service.name}}</td>' +
-        '<td>{{service.description}}</td>' +
-        '<td>{{service.price}}</td>' +
-        '</tr>'
-});
 
-Vue.component('services-list', {
-    template: '<table>' +
-        '<thead>' +
-        '<th colspan="3">Наши услуги</th>' +
-        '</thead>' +
-        '<thead>' +
-        '<th>Название</th>' +
-        '<th>Описание</th>' +
-        '<th>Стоимость</th>' +
-        '</thead>' +
-        '<tbody>' +
-        '<tr is="service-row" v-for="service in services" :key="service.id" :service="service"></tr>' +
-        '</tbody>' +
-        '</table>',
+
+Vue.component('service-row', {
+    props: ['service', 'services', 'editMethod', 'preloaderVisibility'],
     data: function() {
         return {
-            services: []
+            show: this.preloaderVisibility
         }
     },
-    created: function () {
-        ServiceApi.get().then(result =>
-            result.json().then(data =>
-                data.forEach(service => this.services.push(service))))
+    template:
+        '<tr>' +
+            '<td>{{service.name}}</td>' +
+            '<td>{{service.description}}</td>' +
+            '<td>{{service.price}}</td>' +
+            '<td>' +
+                '<input type="button" value="Edit" @click="edit" />' +
+                '<input type="button" value="X" @click="del" />' +
+            '</td>' +
+        '</tr>',
+    methods: {
+        del: function() {
+            ServiceAdminApi.delete({id: this.service.id})
+                .then(result => {
+                    if (result.ok) {
+                        this.services.splice(this.services.indexOf(this.service), 1)
+                    }
+                })
+        },
+        edit: function () {
+            this.editMethod(this.service);
+        }
     }
 });
 
+Vue.component('add-service', {
+    props:['services', 'serviceAttr', 'preloaderVisibility'],
+    data: function() {
+        return {
+            id: '',
+            name: '',
+            description: '',
+            price: '',
+            show: this.preloaderVisibility
+        }
+    },
+    watch: {
+        serviceAttr: function(newVal, oldVal) {
+            this.id = newVal.id;
+            this.name = newVal.name;
+            this.description = newVal.description;
+            this.price = newVal.price;
+        }
+    },
+    template:
+        '<div>' +
+        '<div v-if="!show" style="padding: 2%">' +
+        '<button class="button" @click="show = true">Добавить сервис</button>' +
+        '</div>' +
+        '<table v-if="show">' +
+        '<tr>' +
+        '<td>Название: </td>' +
+        '<td><input type="text" placeholder="Name" v-model="name"/></td>' +
+        '<td>Стоимость: </td>' +
+        '<td><input type="text" placeholder="Price" v-model="price"/></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>Описание: </td>' +
+        '<td colspan="2"><input type="text" placeholder="Description" v-model="description"/></td>' +
+        '<td align="center"><button class="button" @click="save">Сохранить</button></td>' +
+        '</tr>' +
+        '</table>' +
+        '</div>',
+    methods: {
+        save: function () {
+            var service = {
+                name: this.name,
+                description: this.description,
+                price: this.price,
+            };
+
+            if (this.id){
+                ServiceAdminApi.update({id: this.id}, service).then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.services, data.id);
+                        this.services.splice(index,1,data);
+                        this.id = ''
+                        this.name = ''
+                        this.description = ''
+                        this.price = ''
+                        this.show = false
+                    }))
+            } else {
+                ServiceAdminApi.save({}, service).then(result =>
+                    result.json().then(data => {
+                            this.services.push(data)
+                            this.name = ''
+                            this.description = ''
+                            this.price = ''
+                            this.show = false
+                        }
+                    )
+                )
+            }
+        }
+    }
+})
+
+Vue.component('services-list', {
+    template:
+        '<div>'+
+            '<add-service :services="services" :serviceAttr="service" :preloaderVisibility="preloaderVisibility"/><br>' +
+            '<table>' +
+                '<thead>' +
+                 '<th colspan="4">Наши услуги</th>' +
+                '</thead>' +
+                '<thead>' +
+                    '<th>Название</th>' +
+                    '<th>Описание</th>' +
+                    '<th>Стоимость</th>' +
+                    '<th>Действия</th>' +
+                '</thead>' +
+                '<tbody>' +
+                    '<tr is="service-row" v-for="service in services" :key="service.id" :service="service"' +
+                    ':services="services" :editMethod="editMethod" :preloaderVisibility="preloaderVisibility"></tr>' +
+                '</tbody>' +
+            '</table>' +
+        '</div>',
+    data: function() {
+        return {
+            services: [],
+            service: null,
+            preloaderVisibility: false
+        }
+    },
+    created: function () {
+        ServiceAdminApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(service => this.services.push(service))))
+    },
+    methods: {
+        editMethod: function(service) {
+            this.service = service;
+        }
+    }
+});
+
+
+
 Vue.component('phone-row', {
-    props: ['phone', 'phones', 'editMethod'],
-    template: '<tr>' +
-        '<td>{{phone.user.fullName}}</td>' +
-        '<td>{{phone.user.address}}</td>' +
-        '<td>{{phone.phoneNumber}}</td>' +
-        '<td>{{phone.active}}</td>' +
-        '<td>' +
-            '<input type="button" value="Edit" @click="edit" />' +
-            '<input type="button" value="X" @click="del" />' +
-        '</td>' +
+    props: ['phone', 'phones', 'editMethod', 'preloaderVisibility'],
+    data: function() {
+        return {
+            show: this.preloaderVisibility
+        }
+    },
+    template:
+        '<tr>' +
+            '<td>{{phone.user.fullName}}</td>' +
+            '<td>{{phone.user.address}}</td>' +
+            '<td>{{phone.phoneNumber}}</td>' +
+            '<td>{{phone.active}}</td>' +
+            '<td>' +
+                '<input type="button" value="Edit" @click="edit" />' +
+                '<input type="button" value="X" @click="del" />' +
+            '</td>' +
         '</tr>',
     methods: {
         del: function() {
@@ -103,8 +223,8 @@ Vue.component('phone-row', {
     }
 });
 
-Vue.component('add-user', {
-    props:['phones', 'phoneAttr'],
+Vue.component('add-phone', {
+    props:['phones', 'phoneAttr', 'preloaderVisibility'],
     data: function() {
         return {
             id: '',
@@ -113,7 +233,7 @@ Vue.component('add-user', {
             fullName: '',
             address: '',
             phoneNumber: '',
-            // preloaderVisibility: false
+            show: this.preloaderVisibility
         }
     },
     watch: {
@@ -128,11 +248,10 @@ Vue.component('add-user', {
     },
     template:
         '<div>' +
-        '<div v-if="!preloaderVisibility" style="padding: 2%">' +
-            '<button class="button" @click="preloaderVisibility = true">Добавить абонента</button>' +
+        '<div v-if="!show" style="padding: 2%">' +
+            '<button class="button" @click="show = true">Добавить абонента</button>' +
         '</div>' +
-        '<table v-if="preloaderVisibility">' +
-        '<table>' +
+        '<table v-if="show">' +
             '<tr>' +
                 '<td>Логин</td>' +
                 '<td><input type="text" placeholder="Username" v-model="username"/></td>' +
@@ -175,7 +294,7 @@ Vue.component('add-user', {
                         this.fullName = ''
                         this.address = ''
                         this.phoneNumber = ''
-                        this.preloaderVisibility = false
+                        this.show = false
                     }))
             } else {
                 AdminApi.save({}, phone).then(result =>
@@ -186,7 +305,7 @@ Vue.component('add-user', {
                             this.fullName = ''
                             this.address = ''
                             this.phoneNumber = ''
-                            this.preloaderVisibility = false
+                            this.show = false
                         }
                     )
                 )
@@ -198,7 +317,7 @@ Vue.component('add-user', {
 Vue.component('phones-list', {
     template:
         '<div>'+
-            '<add-user :phones="phones" :phoneAttr="phone"/><br>' +
+            '<add-phone :phones="phones" :phoneAttr="phone" :preloaderVisibility="preloaderVisibility"/><br>' +
             '<table>' +
                 '<thead>' +
                     '<th colspan="5">Наши абоненты</th>' +
@@ -234,6 +353,8 @@ Vue.component('phones-list', {
         }
     }
 });
+
+
 
 Vue.component('user-row', {
     props: ['phone'],
@@ -291,8 +412,15 @@ const Admin = {
     template: '<div><header-form-admin/>' +
             '<hr class="tab">' +
             '<br>' +
-            '<div></div>' +
             '<phones-list/>' +
+        '<footer-form/></div>'
+}
+
+const AdminService = {
+    template: '<div><header-form-admin/>' +
+            '<hr class="tab">' +
+            '<br>' +
+            '<services-list/>' +
         '<footer-form/></div>'
 }
 
@@ -301,6 +429,7 @@ const router = new VueRouter({
     routes: [
         { path: '/', component: Main },
         { path: '/admin', component: Admin },
+        { path: '/admin/service', component: AdminService },
         { path: '/user', component: User },
     ]
 })
