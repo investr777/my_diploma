@@ -195,7 +195,7 @@ Vue.component('journalWithPaid-row', {
         '<tr>' +
         '<td>{{journal.phone.user.fullName}}</td>' +
         '<td>{{journal.phone.phoneNumber}}</td>' +
-        '<td>{{journal.fromDate}} - {{journal.toDate}}</td>' +
+        '<td>{{journal.period}}</td>' +
         '<td>{{journal.price}}</td>' +
         '</tr>'
 })

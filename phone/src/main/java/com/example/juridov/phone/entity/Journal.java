@@ -1,9 +1,11 @@
 package com.example.juridov.phone.entity;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "journal")
@@ -19,17 +21,23 @@ public class Journal {
     @JoinColumn(name = "phone_id")
     private Phone phone;
 
-    @Column(name = "fromDate")
-    private Long fromDate;
-
-    @Column(name = "toDate")
-    private Long toDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM.yyyy")
+    @Column(name = "period", updatable = false)
+    private Date period;
 
     @Column(name = "price")
     private double price;
 
     @Column(name = "isPaid")
     private boolean isPaid = false;
+
+    public Date getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Date period) {
+        this.period = period;
+    }
 
     public Long getId() {
         return id;
@@ -45,22 +53,6 @@ public class Journal {
 
     public void setPhone(Phone phone) {
         this.phone = phone;
-    }
-
-    public Long getFromDate() {
-        return fromDate;
-    }
-
-    public void setFromDate(Long fromDate) {
-        this.fromDate = fromDate;
-    }
-
-    public Long getToDate() {
-        return toDate;
-    }
-
-    public void setToDate(Long toDate) {
-        this.toDate = toDate;
     }
 
     public double getPrice() {

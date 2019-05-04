@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -47,6 +48,9 @@ public class JournalService {
 
     public Journal addJournal(Journal journal, Long phoneId) {
         journal.setPhone(phoneRepository.findPhoneById(phoneId));
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH,-1);
+        journal.setPeriod(calendar.getTime());
         return journalRepository.save(journal);
     }
 
@@ -54,12 +58,6 @@ public class JournalService {
         Journal journalFromDB = journalRepository.findJournalById(journalId);
         if (journalFromDB == null) {
             return null;
-        }
-        if (journal.getFromDate() != null) {
-            journalFromDB.setFromDate(journal.getFromDate());
-        }
-        if (journal.getToDate() != null) {
-            journalFromDB.setToDate(journal.getToDate());
         }
         if (journal.getPrice() > 0.0) {
             journalFromDB.setPrice(journal.getPrice());

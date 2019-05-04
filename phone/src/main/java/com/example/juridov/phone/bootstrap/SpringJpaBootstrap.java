@@ -7,6 +7,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 @Component
 public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedEvent> {
     private final UserRepository userRepository;
@@ -85,8 +90,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         Journal journal1 = new Journal();
         journal1.setPhone(phone1);
         journal1.setPaid(true);
-        journal1.setFromDate(1546300800000L);
-        journal1.setToDate(1548892800000L);
+        journal1.setPeriod(new GregorianCalendar(2019, Calendar.JANUARY,25).getTime());
         journal1.setPrice(2.5);
         journalRepository.save(journal1);
 
@@ -94,8 +98,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         Journal journal2 = new Journal();
         journal2.setPhone(phone1);
         journal2.setPaid(false);
-        journal2.setFromDate(1548979200000L);
-        journal2.setToDate(1551312000000L);
+        journal2.setPeriod(new GregorianCalendar(2019, Calendar.FEBRUARY,25).getTime());
         journal2.setPrice(3.6);
         journalRepository.save(journal2);
 
@@ -103,8 +106,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         Journal journal3 = new Journal();
         journal3.setPhone(phone2);
         journal3.setPaid(false);
-        journal3.setFromDate(1546300800000L);
-        journal3.setToDate(1548892800000L);
+        journal3.setPeriod(new GregorianCalendar(2019, Calendar.MARCH,25).getTime());
         journal3.setPrice(1.1);
         journalRepository.save(journal3);
 
