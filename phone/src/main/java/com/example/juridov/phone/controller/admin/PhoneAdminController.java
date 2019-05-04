@@ -48,9 +48,9 @@ public class PhoneAdminController {
     }
 
     @ApiOperation(value = "Block phone or Active phone", response = Phone.class)
-    @RequestMapping(method = RequestMethod.PUT)
-    public Phone blockOrActivePhone(Integer phoneNumber) {
-        return phoneService.checkActiveOrBlock(phoneNumber);
+    @RequestMapping(path = "/block/{id}",method = RequestMethod.PUT)
+    public Phone blockOrActivePhone(@PathVariable Long id) {
+        return phoneService.checkActiveOrBlock(id);
     }
 
     @ApiOperation(value = "Find by phone number", response = Phone.class)

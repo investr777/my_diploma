@@ -54,8 +54,8 @@ public class PhoneService {
         return phoneRepository.findPhoneById(phoneId);
     }
 
-    public Phone checkActiveOrBlock(Integer phoneNumber) {
-        Phone phoneFromDB = phoneRepository.findByPhoneNumber(phoneNumber);
+    public Phone checkActiveOrBlock(Long phoneId) {
+        Phone phoneFromDB = phoneRepository.findPhoneById(phoneId);
         if (phoneFromDB == null) {
             return null;
         }
