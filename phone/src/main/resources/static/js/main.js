@@ -61,13 +61,13 @@ Vue.component('service-row', {
         '<td>{{service.description}}</td>' +
         '<td>{{service.price}}</td>' +
         '<td>' +
-        '<input type="button" value="Edit" @click="edit" />' +
-        '<input type="button" value="X" @click="del" />' +
+        '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
+        '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
         '</td>' +
         '</tr>',
     methods: {
         del: function() {
-            ServiceAdminApi.delete({id: this.service.id})
+            ServiceAdminApi.del({id: this.service.id})
                 .then(result => {
                     if (result.ok) {
                         this.services.splice(this.services.indexOf(this.service), 1)
@@ -235,16 +235,18 @@ Vue.component('phone-row', {
         '<td>{{phone.user.fullName}}</td>' +
         '<td>{{phone.user.address}}</td>' +
         '<td>{{phone.phoneNumber}}</td>' +
-        '<td>{{phone.active}}</td>' +
+        '<td v-if="phone.active">Активен</td>' +
+        '<td v-else>Заблокирован</td>' +
         '<td>' +
-        '<input type="button" value="Edit" @click="edit" />' +
-        '<input type="button" value="X" @click="del" />' +
-        '<input type="button" value="Block" @click="block" />' +
+        '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
+        '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
+        '<img src="/img/block.png" v-if="phone.active" src="/img/block.png" width="35px" title="Заблокировать" @click="block" />' +
+        '<img src="/img/unblock.png" v-else width="35px" title="Разблокировать" @click="block" />' +
         '</td>' +
         '</tr>',
     methods: {
         del: function() {
-            AdminApi.delete({id: this.phone.id})
+            AdminApi.del({id: this.phone.id})
                 .then(result => {
                     if (result.ok) {
                         this.phones.splice(this.phones.indexOf(this.phone), 1)
