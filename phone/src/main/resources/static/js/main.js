@@ -11,6 +11,7 @@ var ServiceApi = Vue.resource('/services')
 var AdminApi = Vue.resource('/admin{/id}')
 var UserApi = Vue.resource('/user')
 var ServiceAdminApi = Vue.resource('/admin/service{/id}')
+var JournalAdminApi = Vue.resource('/admin/journal{/id}')
 
 Vue.component('header-form', {
     template: '<header>' +
@@ -23,6 +24,7 @@ Vue.component('header-form', {
 Vue.component('header-form-admin', {
     template: '<header>' +
         '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
+        '<div align="right">Администратор</div>' +
         '<a href="/#/admin"><img src="/img/logo.png"></a>' +
         '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
         '</header>'
@@ -187,6 +189,40 @@ Vue.component('services-list', {
 
 
 
+Vue.component('journalWithPaid-row', {
+    props: ['journal'],
+    template:
+        '<tr>' +
+        '<td>{{journal.phone.user.fullName}}</td>' +
+        '<td>{{journal.phone.phoneNumber}}</td>' +
+        '<td>{{journal.fromDate}} - {{journal.toDate}}</td>' +
+        '<td>{{journal.price}}</td>' +
+        '</tr>'
+})
+
+Vue.component('journalsWithPaid-list', {
+    props: ['journals'],
+    template:
+        '<div>'+
+        '<table>' +
+        '<thead>' +
+        '<th colspan="4">Неоплаченные счета</th>' +
+        '</thead>' +
+        '<thead>' +
+        '<th>ФИО</th>' +
+        '<th>Номер телефона</th>' +
+        '<th>Период</th>' +
+        '<th>Сумма</th>' +
+        '</thead>' +
+        '<tbody>' +
+        '<tr is="journalWithPaid-row" v-for="journal in journals" :key="journal.id" :journal="journal"></tr>' +
+        '</tbody>' +
+        '</table>' +
+        '</div>'
+})
+
+
+
 Vue.component('phone-row', {
     props: ['phone', 'phones', 'editMethod', 'preloaderVisibility'],
     data: function() {
@@ -258,6 +294,7 @@ Vue.component('add-phone', {
         '<div v-if="!show" style="padding: 2%">' +
         '<button style="margin: 0px 10px" class="button" @click="show = true">Добавить абонента</button>' +
         '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/admin/service\'">Сервисы</button>' +
+        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/admin/journal\'">Неоплаченные счета</button>' +
         '</div>' +
         '<table v-if="show">' +
         '<tr>' +
@@ -448,12 +485,31 @@ const AdminService = {
     }
 }
 
+const AdminJournalsWithoutPaid = {
+    template: '<div><header-form-admin/>' +
+        '<hr class="tab">' +
+        '<br>' +
+        '<journalsWithPaid-list :journals="journals"/>' +
+        '<footer-form/></div>',
+    data: function() {
+        return {
+            journals: [],
+        }
+    },
+    created: function () {
+        JournalAdminApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(journal => this.journals.push(journal))))
+    }
+}
+
 const router = new VueRouter({
     // mode: 'history',
     routes: [
         { path: '/', component: Main },
         { path: '/admin', component: Admin },
         { path: '/admin/service', component: AdminService },
+        { path: '/admin/journal', component: AdminJournalsWithoutPaid },
         { path: '/user', component: User },
     ]
 })
