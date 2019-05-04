@@ -67,7 +67,7 @@ Vue.component('service-row', {
         '</tr>',
     methods: {
         del: function() {
-            ServiceAdminApi.del({id: this.service.id})
+            ServiceAdminApi.delete({id: this.service.id})
                 .then(result => {
                     if (result.ok) {
                         this.services.splice(this.services.indexOf(this.service), 1)
@@ -240,13 +240,13 @@ Vue.component('phone-row', {
         '<td>' +
         '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
-        '<img src="/img/block.png" v-if="phone.active" src="/img/block.png" width="35px" title="Заблокировать" @click="block" />' +
+        '<img  v-if="phone.active" src="/img/block.png" width="35px" title="Заблокировать" @click="block" />' +
         '<img src="/img/unblock.png" v-else width="35px" title="Разблокировать" @click="block" />' +
         '</td>' +
         '</tr>',
     methods: {
         del: function() {
-            AdminApi.del({id: this.phone.id})
+            AdminApi.delete({id: this.phone.id})
                 .then(result => {
                     if (result.ok) {
                         this.phones.splice(this.phones.indexOf(this.phone), 1)
@@ -371,11 +371,11 @@ Vue.component('phones-list', {
         '<th colspan="5">Наши абоненты</th>' +
         '</thead>' +
         '<thead>' +
-        '<th>ФИО</th>' +
-        '<th>Адрес</th>' +
-        '<th>Номер телефона</th>' +
-        '<th>Статус</th>' +
-        '<th>Действия</th>' +
+        '<th width="22%">ФИО</th>' +
+        '<th width="29%">Адрес</th>' +
+        '<th width="15%">Номер телефона</th>' +
+        '<th width="19%">Статус</th>' +
+        '<th width="15%">Действия</th>' +
         '</thead>' +
         '<tbody>' +
         '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone" ' +
