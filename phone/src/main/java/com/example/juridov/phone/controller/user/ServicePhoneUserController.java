@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,10 +46,10 @@ public class ServicePhoneUserController {
     }
 
     @ApiOperation(value = "Add a new service to this phone", response = ServicePhone.class)
-    @RequestMapping(path = "/{serviceId}", method = RequestMethod.POST)
-    public ServicePhone addServiceToPhone(@AuthenticationPrincipal User user, @PathVariable Long serviceId) throws Exception {
+    @RequestMapping(method = RequestMethod.POST)
+    public ServicePhone addServiceToPhone(@AuthenticationPrincipal User user, @RequestBody Service service) throws Exception {
         Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
-        return servicePhoneService.addServiceToPhone(phoneId, serviceId);
+        return servicePhoneService.addServiceToPhone(phoneId, service.getId());
     }
 
     @ApiOperation(value = "Delete a service from this phone", response = ServicePhone.class)

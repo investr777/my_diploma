@@ -438,22 +438,22 @@ Vue.component('users-list', {
 
 
 Vue.component('user-service-row', {
-    props: ['service', 'services'],
+    props: ['userService', 'userServices'],
     template:
         '<tr>' +
-        '<td>{{service.service.name}}</td>' +
-        '<td>{{service.service.description}}</td>' +
-        '<td>{{service.service.price}}</td>' +
+        '<td>{{userService.service.name}}</td>' +
+        '<td>{{userService.service.description}}</td>' +
+        '<td>{{userService.service.price}}</td>' +
         '<td>' +
         '<p style="text-align: center"><img src="/img/del.png" width="35px" title="Удалить" @click="del" /></p>' +
         '</td>' +
         '</tr>',
     methods: {
         del: function() {
-            ServiceUserApi.delete({id: this.service.id})
+            ServiceUserApi.delete({id: this.userService.id})
                 .then(result => {
                     if (result.ok) {
-                        this.services.splice(this.services.indexOf(this.service), 1)
+                        this.userServices.splice(this.userServices.indexOf(this.userService), 1)
                     }
                 })
         }
@@ -461,7 +461,7 @@ Vue.component('user-service-row', {
 });
 
 Vue.component('user-services-list', {
-    props: ['services'],
+    props: ['userServices'],
     template:
         '<div>'+
         '<table>' +
@@ -475,8 +475,8 @@ Vue.component('user-services-list', {
         '<th>Действия</th>' +
         '</thead>' +
         '<tbody>' +
-        '<tr is="user-service-row" v-for="service in services" :key="service.id" :service="service"' +
-        ':services="services"></tr>' +
+        '<tr is="user-service-row" v-for="service in userServices" :key="service.id" :userService="service"' +
+        ':userServices="userServices"></tr>' +
         '</tbody>' +
         '</table>' +
         '</div>',
@@ -485,7 +485,7 @@ Vue.component('user-services-list', {
 
 
 Vue.component('all-service-row', {
-    props: ['service'],
+    props: ['service', 'userServices'],
     template:
         '<tr>' +
         '<td>{{service.name}}</td>' +
@@ -497,10 +497,12 @@ Vue.component('all-service-row', {
         '</tr>',
     methods: {
         add: function() {
-            ServiceAdminApi.delete({id: this.service.id})
+            ServiceUserApi.save({}, this.service)
                 .then(result => {
                     if (result.ok) {
-                        this.services.splice(this.services.indexOf(this.service), 1)
+                        result.json().then(data => {
+                            this.userServices.push(data)
+                        })
                     }
                 })
         }
@@ -508,7 +510,7 @@ Vue.component('all-service-row', {
 });
 
 Vue.component('all-services-list', {
-    props: ['allServices'],
+    props: ['allServices', 'userServices'],
     template:
         '<div>'+
             '<table>' +
@@ -522,7 +524,8 @@ Vue.component('all-services-list', {
                     '<th>Действия</th>' +
                 '</thead>' +
                 '<tbody>' +
-                    '<tr is="all-service-row" v-for="service in allServices" :key="service.id" :service="service" />' +
+                    '<tr is="all-service-row" v-for="service in allServices" :key="service.id" :service="service"' +
+                    ':userServices="userServices"/>' +
                 '</tbody>' +
             '</table>' +
         '</div>'
@@ -559,21 +562,21 @@ const UserService = {
     template: '<div><header-form-user/>' +
         '<hr class="tab">' +
         '<br>' +
-        '<user-services-list :services="services"/>' +
+        '<user-services-list :userServices="userServices"/>' +
         '<br>' +
         '<br>' +
-        '<all-services-list :allServices="allServices"/>' +
+        '<all-services-list :allServices="allServices" :userServices="userServices"/>' +
         '<footer-form/></div>',
     data: function() {
         return {
-            services: [],
+            userServices: [],
             allServices: []
         }
     },
     created: function () {
         ServiceUserApi.get().then(result =>
             result.json().then(data =>
-                data.forEach(service => this.services.push(service))));
+                data.forEach(service => this.userServices.push(service))));
 
         Vue.resource('/user/service/services').get().then(result =>
             result.json().then(data =>
