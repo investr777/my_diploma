@@ -49,9 +49,12 @@ public class JournalService {
     public Journal addJournal(Journal journal, Long phoneId) {
         journal.setPhone(phoneRepository.findPhoneById(phoneId));
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH,-1);
+        calendar.add(Calendar.MONTH, -1);
         journal.setPeriod(calendar.getTime());
-        return journalRepository.save(journal);
+        if (journal.getPrice() > 0.0) {
+            return journalRepository.save(journal);
+        }
+        return null;
     }
 
     public Journal updateJournal(Journal journal, Long journalId) {

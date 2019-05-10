@@ -128,7 +128,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         Service service3 = new Service();
         service3.setName("Hidden number");
         service3.setDescription("Unknown number");
-        service3.setPrice(2.5);
+        service3.setPrice(3.0);
         serviceRepository.save(service3);
 
         //Add first servicePhone
