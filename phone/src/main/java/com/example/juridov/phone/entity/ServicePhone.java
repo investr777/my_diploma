@@ -11,7 +11,6 @@ import javax.persistence.*;
 public class ServicePhone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @Column(name = "id")
     private Long id;
 

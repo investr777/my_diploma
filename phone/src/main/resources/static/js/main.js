@@ -9,9 +9,11 @@ function getIndex(list, id) {
 
 var ServiceApi = Vue.resource('/services')
 var AdminApi = Vue.resource('/admin{/id}')
-var UserApi = Vue.resource('/user')
 var ServiceAdminApi = Vue.resource('/admin/service{/id}')
 var JournalAdminApi = Vue.resource('/admin/journal{/id}')
+
+var UserApi = Vue.resource('/user')
+var ServiceUserApi = Vue.resource('/user/service{/id}')
 
 Vue.component('header-form', {
     template: '<header>' +
@@ -404,27 +406,129 @@ Vue.component('user-row', {
         '<td>{{phone.user.fullName}}</td>' +
         '<td>{{phone.user.address}}</td>' +
         '<td>{{phone.phoneNumber}}</td>' +
-        '<td>{{phone.active}}</td>' +
+        '<td v-if="phone.active">Активен</td>' +
+        '<td v-else>Заблокирован</td>' +
         '</tr>'
 });
 
 Vue.component('users-list', {
     props: ['userPhone'],
-    template: '<table>' +
+    template:
+        '<div>' +
+            '<div style="padding: 2%">' +
+                '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/service\'">Сервисы</button>' +
+            '</div>' +
+            '<table>' +
+                '<thead>' +
+                    '<th colspan="4">Информация о вашем телефонном номере</th>' +
+                '</thead>' +
+                '<thead>' +
+                    '<th width="27">ФИО</th>' +
+                    '<th width="34">Адрес</th>' +
+                    '<th width="20">Номер телефона</th>' +
+                    '<th width="19">Статус</th>' +
+                '</thead>' +
+                '<tbody>' +
+                    '<tr is="user-row" v-for="phone in userPhone" :key="phone.id" :phone="phone"></tr>' +
+                '</tbody>' +
+            '</table>' +
+        '</div>'
+});
+
+
+
+Vue.component('user-service-row', {
+    props: ['service', 'services'],
+    template:
+        '<tr>' +
+        '<td>{{service.service.name}}</td>' +
+        '<td>{{service.service.description}}</td>' +
+        '<td>{{service.service.price}}</td>' +
+        '<td>' +
+        '<p style="text-align: center"><img src="/img/del.png" width="35px" title="Удалить" @click="del" /></p>' +
+        '</td>' +
+        '</tr>',
+    methods: {
+        del: function() {
+            ServiceUserApi.delete({id: this.service.id})
+                .then(result => {
+                    if (result.ok) {
+                        this.services.splice(this.services.indexOf(this.service), 1)
+                    }
+                })
+        }
+    }
+});
+
+Vue.component('user-services-list', {
+    props: ['services'],
+    template:
+        '<div>'+
+        '<table>' +
         '<thead>' +
-        '<th colspan="4">Информация о вашем телефонном номере</th>' +
+        '<th colspan="4">Ваши услуги</th>' +
         '</thead>' +
         '<thead>' +
-        '<th>ФИО</th>' +
-        '<th>Адрес</th>' +
-        '<th>Номер телефона</th>' +
-        '<th>Статус</th>' +
+        '<th>Название</th>' +
+        '<th>Описание</th>' +
+        '<th>Стоимость</th>' +
+        '<th>Действия</th>' +
         '</thead>' +
         '<tbody>' +
-        '<tr is="user-row" v-for="phone in userPhone" :key="phone.id" :phone="phone"></tr>' +
+        '<tr is="user-service-row" v-for="service in services" :key="service.id" :service="service"' +
+        ':services="services"></tr>' +
         '</tbody>' +
-        '</table>'
+        '</table>' +
+        '</div>',
 });
+
+
+
+Vue.component('all-service-row', {
+    props: ['service'],
+    template:
+        '<tr>' +
+        '<td>{{service.name}}</td>' +
+        '<td>{{service.description}}</td>' +
+        '<td>{{service.price}}</td>' +
+        '<td>' +
+        '<p style="text-align: center"><img src="/img/plus.png" width="35px" title="Подключить" @click="add" /></p>' +
+        '</td>' +
+        '</tr>',
+    methods: {
+        add: function() {
+            ServiceAdminApi.delete({id: this.service.id})
+                .then(result => {
+                    if (result.ok) {
+                        this.services.splice(this.services.indexOf(this.service), 1)
+                    }
+                })
+        }
+    }
+});
+
+Vue.component('all-services-list', {
+    props: ['allServices'],
+    template:
+        '<div>'+
+            '<table>' +
+                '<thead>' +
+                    '<th colspan="4">Наши услуги</th>' +
+                '</thead>' +
+                '<thead>' +
+                    '<th>Название</th>' +
+                    '<th>Описание</th>' +
+                    '<th>Стоимость</th>' +
+                    '<th>Действия</th>' +
+                '</thead>' +
+                '<tbody>' +
+                    '<tr is="all-service-row" v-for="service in allServices" :key="service.id" :service="service" />' +
+                '</tbody>' +
+            '</table>' +
+        '</div>'
+});
+
+
 
 const Main = {
     template: '<div><header-form/>' +
@@ -448,6 +552,32 @@ const User = {
     created: function () {
         UserApi.get().then(result =>
             result.json().then(phone => this.userPhone.push(phone)))
+    }
+}
+
+const UserService = {
+    template: '<div><header-form-user/>' +
+        '<hr class="tab">' +
+        '<br>' +
+        '<user-services-list :services="services"/>' +
+        '<br>' +
+        '<br>' +
+        '<all-services-list :allServices="allServices"/>' +
+        '<footer-form/></div>',
+    data: function() {
+        return {
+            services: [],
+            allServices: []
+        }
+    },
+    created: function () {
+        ServiceUserApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(service => this.services.push(service))));
+
+        Vue.resource('/user/service/services').get().then(result =>
+            result.json().then(data =>
+                data.forEach(service => this.allServices.push(service))))
     }
 }
 
@@ -513,6 +643,7 @@ const router = new VueRouter({
         { path: '/admin/service', component: AdminService },
         { path: '/admin/journal', component: AdminJournalsWithoutPaid },
         { path: '/user', component: User },
+        { path: '/user/service', component: UserService },
     ]
 })
 

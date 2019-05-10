@@ -64,6 +64,6 @@ public class AutoAddJournalToPhone {
 
     @Scheduled(fixedDelay = 60000)
     public void reportCurrentTime() {
-        autoAddJournalToPhones();
+//        autoAddJournalToPhones();
     }
 }
