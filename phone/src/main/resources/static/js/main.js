@@ -75,7 +75,7 @@ Vue.component('service-row', {
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
         '</td>' +
         '<td v-if="show">' +
-        '<img src="/img/plus.png" width="35px" title="Сохранить" @click="save" />' +
+        '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" /></p>' +
         '</td>' +
         '</tr>',
     methods: {
@@ -230,24 +230,34 @@ Vue.component('journalsWithPaid-list', {
 
 
 Vue.component('phone-row', {
-    props: ['phone', 'phones', 'editMethod', 'preloaderVisibility'],
+    props: ['phone', 'phones', 'preloaderVisibility'],
     data: function() {
         return {
+            id: '',
+            fullName: '',
+            address: '',
+            phoneNumber: '',
             show: this.preloaderVisibility
         }
     },
     template:
         '<tr>' +
-        '<td>{{phone.user.fullName}}</td>' +
-        '<td>{{phone.user.address}}</td>' +
-        '<td>{{phone.phoneNumber}}</td>' +
+        '<td v-if="!show">{{phone.user.fullName}}</td>' +
+        '<td v-if="show"><input type="text" placeholder="Full name" v-model="fullName"/></td>' +
+        '<td v-if="!show">{{phone.user.address}}</td>' +
+        '<td v-if="show"><input type="text" placeholder="Address" v-model="address"/></td>' +
+        '<td v-if="!show">{{phone.phoneNumber}}</td>' +
+        '<td v-if="show"><input type="text" placeholder="Phone number" v-model="phoneNumber"/></td>' +
         '<td v-if="phone.active">Активен</td>' +
         '<td v-else>Заблокирован</td>' +
-        '<td>' +
+        '<td v-if="!show">' +
         '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
         '<img  v-if="phone.active" src="/img/block.png" width="35px" title="Заблокировать" @click="block" />' +
         '<img src="/img/unblock.png" v-else width="35px" title="Разблокировать" @click="block" />' +
+        '</td>' +
+        '<td v-if="show">' +
+        '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" /></p>' +
         '</td>' +
         '</tr>',
     methods: {
@@ -259,9 +269,6 @@ Vue.component('phone-row', {
                     }
                 })
         },
-        edit: function () {
-            this.editMethod(this.phone);
-        },
         block: function () {
             var phoneBlock = { active: false}
             Vue.resource('/admin/block{/id}').update({id: this.phone.id}, phoneBlock)
@@ -270,12 +277,38 @@ Vue.component('phone-row', {
                         var index = getIndex(this.phones, data.id);
                         this.phones.splice(index,1,data);
                     }))
+        },
+        edit: function(){
+            this.show = true;
+            this.id = this.phone.id
+            this.fullName = this.phone.user.fullName
+            this.address = this.phone.user.address
+            this.phoneNumber = this.phone.phoneNumber
+        },
+        save: function () {
+            var phone = {
+                phoneNumber: this.phoneNumber,
+                user: {
+                    fullName: this.fullName,
+                    address: this.address
+                }
+            };
+            AdminApi.update({id: this.id}, phone).then(result =>
+                result.json().then(data => {
+                    var index = getIndex(this.phones, data.id);
+                    this.phones.splice(index,1,data);
+                    this.id = ''
+                    this.fullName = ''
+                    this.address = ''
+                    this.phoneNumber = ''
+                    this.show = false
+                }))
         }
     }
 });
 
 Vue.component('add-phone', {
-    props:['phones', 'phoneAttr', 'preloaderVisibility'],
+    props:['phones', 'preloaderVisibility'],
     data: function() {
         return {
             id: '',
@@ -287,16 +320,6 @@ Vue.component('add-phone', {
             show: this.preloaderVisibility
         }
     },
-    watch: {
-        phoneAttr: function(newVal, oldVal) {
-            this.id = newVal.id;
-            this.username = newVal.user.username;
-            this.password = newVal.user.password;
-            this.fullName = newVal.user.fullName;
-            this.address = newVal.user.address;
-            this.phoneNumber = newVal.phoneNumber;
-        }
-    },
     template:
         '<div>' +
         '<div v-if="!show" style="padding: 2%">' +
@@ -306,21 +329,21 @@ Vue.component('add-phone', {
         '</div>' +
         '<table v-if="show">' +
         '<tr>' +
-        '<td>Логин</td>' +
-        '<td><input type="text" placeholder="Username" v-model="username"/></td>' +
-        '<td>Пароль</td>' +
-        '<td><input type="text" placeholder="Password" v-model="password"/></td>' +
+        '<td width="15%">Логин</td>' +
+        '<td width="35%"><input type="text" placeholder="Username" v-model="username"/></td>' +
+        '<td width="15%">Пароль</td>' +
+        '<td width="35%"><input type="password" placeholder="Password" v-model="password"/></td>' +
         '</tr>' +
         '<tr>' +
-        '<td>ФИО</td>' +
-        '<td><input type="text" placeholder="Full name" v-model="fullName"/></td>' +
-        '<td>Адрес</td>' +
-        '<td><input type="text" placeholder="Address" v-model="address"/></td>' +
+        '<td width="15%">ФИО</td>' +
+        '<td width="35%"><input type="text" placeholder="Full name" v-model="fullName"/></td>' +
+        '<td width="15%">Адрес</td>' +
+        '<td width="35%"><input type="text" placeholder="Address" v-model="address"/></td>' +
         '</tr>' +
         '<tr>' +
-        '<td>Телефонный номер: </td>' +
-        '<td><input type="text" placeholder="Phone number" v-model="phoneNumber"/></td>' +
-        '<td colspan="2" align="center"><button class="button" @click="save">Сохранить</button></td>' +
+        '<td width="15%">Телефонный номер: </td>' +
+        '<td width="35%"><input type="text" placeholder="Phone number" v-model="phoneNumber"/></td>' +
+        '<td width="50%" colspan="2" align="center"><button class="button" @click="save">Сохранить</button></td>' +
         '</tr>' +
         '</table>' +
         '</div>',
@@ -371,7 +394,7 @@ Vue.component('phones-list', {
     props: ['phones'],
     template:
         '<div>'+
-        '<add-phone :phones="phones" :phoneAttr="phone" :preloaderVisibility="preloaderVisibility"/><br>' +
+        '<add-phone :phones="phones" :preloaderVisibility="preloaderVisibility"/><br>' +
         '<table>' +
         '<thead>' +
         '<th colspan="5">Наши абоненты</th>' +
@@ -385,19 +408,13 @@ Vue.component('phones-list', {
         '</thead>' +
         '<tbody>' +
         '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone" ' +
-        ':phones="phones" :editMethod="editMethod" :preloaderVisibility="preloaderVisibility"></tr>' +
+        ':phones="phones" :preloaderVisibility="preloaderVisibility"></tr>' +
         '</tbody>' +
         '</table>' +
         '</div>',
     data: function() {
         return {
-            phone: null,
             preloaderVisibility: false
-        }
-    },
-    methods: {
-        editMethod: function(phone) {
-            this.phone = phone;
         }
     }
 });
