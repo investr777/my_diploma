@@ -82,9 +82,16 @@ Vue.component('service-row', {
         isDouble: function(evt) {
             evt = (evt) ? evt : window.event;
             var charCode = (evt.which) ? evt.which : evt.keyCode;
-            if ((charCode < 48 || charCode > 57)&& (charCode < 46 || charCode > 46)) {
+            if ((charCode < 48 || charCode > 57)&& charCode !== 46) {
                 evt.preventDefault();
             } else {
+                if (this.price.indexOf('.') > -1) {
+                    if (charCode < 48 || charCode > 57) {
+                        evt.preventDefault();
+                    } else {
+                        return true;
+                    }
+                }
                 return true;
             }
         },
@@ -179,6 +186,13 @@ Vue.component('add-service', {
             if ((charCode < 48 || charCode > 57)&& charCode !== 46) {
                 evt.preventDefault();
             } else {
+                if (this.price.indexOf('.') > -1) {
+                    if (charCode < 48 || charCode > 57) {
+                        evt.preventDefault();
+                    } else {
+                        return true;
+                    }
+                }
                 return true;
             }
         },
