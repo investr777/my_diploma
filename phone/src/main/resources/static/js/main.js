@@ -67,9 +67,9 @@ Vue.component('service-row', {
         '<td v-if="!show">{{service.name}}</td>' +
         '<td v-if="!show">{{service.description}}</td>' +
         '<td v-if="!show">{{service.price}}</td>' +
-        '<td v-if="show"><input type="text" placeholder="Name" v-model="name"/></td>' +
-        '<td v-if="show"><input type="text" placeholder="Description" v-model="description"/></td>' +
-        '<td v-if="show"><input type="text" placeholder="Price" v-model="price"/></td>' +
+        '<td v-if="show"><input id="nameEdit" type="text" placeholder="Name" v-model="name"/></td>' +
+        '<td v-if="show"><input id="descriptionEdit" type="text" placeholder="Description" v-model="description"/></td>' +
+        '<td v-if="show"><input id="priceEdit" type="text" placeholder="Price" v-model="price" @keypress="isDouble($event)"/></td>' +
         '<td v-if="!show">' +
         '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
@@ -79,6 +79,15 @@ Vue.component('service-row', {
         '</td>' +
         '</tr>',
     methods: {
+        isDouble: function(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if ((charCode < 48 || charCode > 57)&& (charCode < 46 || charCode > 46)) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
         del: function() {
             ServiceAdminApi.delete({id: this.service.id})
                 .then(result => {
@@ -95,21 +104,40 @@ Vue.component('service-row', {
             this.price = this.service.price
         },
         save: function () {
-            var service = {
-                name: this.name,
-                description: this.description,
-                price: this.price,
-            };
-            ServiceAdminApi.update({id: this.id}, service).then(result =>
-                result.json().then(data => {
-                    var index = getIndex(this.services, data.id);
-                    this.services.splice(index,1,data);
-                    this.id = ''
-                    this.name = ''
-                    this.description = ''
-                    this.price = ''
-                    this.show = false
-                }))
+            if (this.name === '' || this.price === '' || this.description === '') {
+                alert("Заполните все поля")
+                if (this.name === '') {
+                    document.getElementById('nameEdit').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('nameEdit').style.backgroundColor = "#ffffff"
+                }
+                if (this.price === '') {
+                    document.getElementById('priceEdit').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('priceEdit').style.backgroundColor = "#ffffff"
+                }
+                if (this.description === '') {
+                    document.getElementById('descriptionEdit').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('descriptionEdit').style.backgroundColor = "#ffffff"
+                }
+            } else {
+                var service = {
+                    name: this.name,
+                    description: this.description,
+                    price: this.price,
+                };
+                ServiceAdminApi.update({id: this.id}, service).then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.services, data.id);
+                        this.services.splice(index, 1, data);
+                        this.id = ''
+                        this.name = ''
+                        this.description = ''
+                        this.price = ''
+                        this.show = false
+                    }))
+            }
         }
     }
 });
@@ -133,24 +161,51 @@ Vue.component('add-service', {
         '<table v-if="show">' +
         '<tr>' +
         '<td>Название: </td>' +
-        '<td><input type="text" placeholder="Name" v-model="name"/></td>' +
+        '<td><input id="name" type="text" placeholder="Name" v-model="name"/></td>' +
         '<td>Стоимость: </td>' +
-        '<td><input type="text" placeholder="Price" v-model="price"/></td>' +
+        '<td><input id="price" type="text" placeholder="Price" v-model="price" @keypress="isDouble($event)"/></td>' +
         '</tr>' +
         '<tr>' +
         '<td>Описание: </td>' +
-        '<td colspan="2"><input type="text" placeholder="Description" v-model="description"/></td>' +
+        '<td colspan="2"><input id="description" type="text" placeholder="Description" v-model="description"/></td>' +
         '<td align="center"><button class="button" @click="save">Сохранить</button></td>' +
         '</tr>' +
         '</table>' +
         '</div>',
     methods: {
+        isDouble: function(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if ((charCode < 48 || charCode > 57)&& charCode !== 46) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
         save: function () {
-            var service = {
-                name: this.name,
-                description: this.description,
-                price: this.price,
-            };
+            if (this.name === '' || this.price === '' || this.description === '') {
+                alert("Заполните все поля")
+                if (this.name === '') {
+                    document.getElementById('name').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('name').style.backgroundColor = "#ffffff"
+                }
+                if (this.price === '') {
+                    document.getElementById('price').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('price').style.backgroundColor = "#ffffff"
+                }
+                if (this.description === '') {
+                    document.getElementById('description').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('description').style.backgroundColor = "#ffffff"
+                }
+            } else {
+                var service = {
+                    name: this.name,
+                    description: this.description,
+                    price: this.price,
+                };
                 ServiceAdminApi.save({}, service).then(result =>
                     result.json().then(data => {
                             this.services.push(data)
@@ -161,6 +216,7 @@ Vue.component('add-service', {
                         }
                     )
                 )
+            }
         }
     }
 })
@@ -243,11 +299,12 @@ Vue.component('phone-row', {
     template:
         '<tr>' +
         '<td v-if="!show">{{phone.user.fullName}}</td>' +
-        '<td v-if="show"><input type="text" placeholder="Full name" v-model="fullName"/></td>' +
+        '<td v-if="show"><input id="fullNameEdit" type="text" placeholder="Full name" v-model="fullName"/></td>' +
         '<td v-if="!show">{{phone.user.address}}</td>' +
-        '<td v-if="show"><input type="text" placeholder="Address" v-model="address"/></td>' +
+        '<td v-if="show"><input id="addressEdit" type="text" placeholder="Address" v-model="address"/></td>' +
         '<td v-if="!show">{{phone.phoneNumber}}</td>' +
-        '<td v-if="show"><input type="text" placeholder="Phone number" v-model="phoneNumber"/></td>' +
+        '<td v-if="show"><input id="phoneNumberEdit" type="text" placeholder="Phone number" v-model="phoneNumber"' +
+        ' @keypress="isNumber($event)" maxlength="12"/></td>' +
         '<td v-if="phone.active">Активен</td>' +
         '<td v-else>Заблокирован</td>' +
         '<td v-if="!show">' +
@@ -261,6 +318,15 @@ Vue.component('phone-row', {
         '</td>' +
         '</tr>',
     methods: {
+        isNumber: function(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
         del: function() {
             AdminApi.delete({id: this.phone.id})
                 .then(result => {
@@ -286,6 +352,24 @@ Vue.component('phone-row', {
             this.phoneNumber = this.phone.phoneNumber
         },
         save: function () {
+            if (this.address === '' || this.fullName === '' || this.phoneNumber === '') {
+                alert("Заполните все поля")
+                if (this.fullName === '') {
+                    document.getElementById('fullNameEdit').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('fullNameEdit').style.backgroundColor = "#ffffff"
+                }
+                if (this.address === '') {
+                    document.getElementById('addressEdit').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('addressEdit').style.backgroundColor = "#ffffff"
+                }
+                if (this.phoneNumber === '') {
+                    document.getElementById('phoneNumberEdit').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('phoneNumberEdit').style.backgroundColor = "#ffffff"
+                }
+            } else {
             var phone = {
                 phoneNumber: this.phoneNumber,
                 user: {
@@ -303,6 +387,7 @@ Vue.component('phone-row', {
                     this.phoneNumber = ''
                     this.show = false
                 }))
+        }
         }
     }
 });
@@ -330,49 +415,73 @@ Vue.component('add-phone', {
         '<table v-if="show">' +
         '<tr>' +
         '<td width="15%">Логин</td>' +
-        '<td width="35%"><input type="text" placeholder="Username" v-model="username"/></td>' +
+        '<td width="35%"><input id="username" type="text" placeholder="Username" v-model="username"/></td>' +
         '<td width="15%">Пароль</td>' +
-        '<td width="35%"><input type="password" placeholder="Password" v-model="password"/></td>' +
+        '<td width="35%"><input id="password" type="password" placeholder="Password" v-model="password"/></td>' +
         '</tr>' +
         '<tr>' +
         '<td width="15%">ФИО</td>' +
-        '<td width="35%"><input type="text" placeholder="Full name" v-model="fullName"/></td>' +
+        '<td width="35%"><input id="fullName" type="text" placeholder="Full name" v-model="fullName"/></td>' +
         '<td width="15%">Адрес</td>' +
-        '<td width="35%"><input type="text" placeholder="Address" v-model="address"/></td>' +
+        '<td width="35%"><input id="address" type="text" placeholder="Address" v-model="address"/></td>' +
         '</tr>' +
         '<tr>' +
         '<td width="15%">Телефонный номер: </td>' +
-        '<td width="35%"><input type="text" placeholder="Phone number" v-model="phoneNumber"/></td>' +
+        '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
+        ' @keypress="isNumber($event)" maxlength="12"/></td>' +
         '<td width="50%" colspan="2" align="center"><button class="button" @click="save">Сохранить</button></td>' +
         '</tr>' +
         '</table>' +
         '</div>',
     methods: {
-        save: function () {
-            var phone = {
-                phoneNumber: this.phoneNumber,
-                user: {
-                    username: this.username,
-                    password: this.password,
-                    fullName: this.fullName,
-                    address: this.address
-                }
-            };
-
-            if (this.id){
-                AdminApi.update({id: this.id}, phone).then(result =>
-                    result.json().then(data => {
-                        var index = getIndex(this.phones, data.id);
-                        this.phones.splice(index,1,data);
-                        this.id = ''
-                        this.username = ''
-                        this.password = ''
-                        this.fullName = ''
-                        this.address = ''
-                        this.phoneNumber = ''
-                        this.show = false
-                    }))
+        isNumber: function(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                evt.preventDefault();
             } else {
+                return true;
+            }
+        },
+        save: function () {
+            if (this.username === '' || this.password === '' || this.address === ''
+                || this.fullName === '' || this.phoneNumber === '') {
+                alert("Заполните все поля")
+                if (this.username === '') {
+                    document.getElementById('username').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('username').style.backgroundColor = "#ffffff"
+                }
+                if (this.password === '') {
+                    document.getElementById('password').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('password').style.backgroundColor = "#ffffff"
+                }
+                if (this.fullName === '') {
+                    document.getElementById('fullName').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('fullName').style.backgroundColor = "#ffffff"
+                }
+                if (this.address === '') {
+                    document.getElementById('address').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('address').style.backgroundColor = "#ffffff"
+                }
+                if (this.phoneNumber === '') {
+                    document.getElementById('phoneNumber').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('phoneNumber').style.backgroundColor = "#ffffff"
+                }
+            } else {
+                var phone = {
+                    phoneNumber: this.phoneNumber,
+                    user: {
+                        username: this.username,
+                        password: this.password,
+                        fullName: this.fullName,
+                        address: this.address
+                    }
+                };
                 AdminApi.save({}, phone).then(result =>
                     result.json().then(data => {
                             this.phones.push(data)
@@ -778,3 +887,4 @@ var app = new Vue({
     el: '#main',
     router: router,
 });
+
