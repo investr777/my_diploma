@@ -52,20 +52,30 @@ Vue.component('footer-form', {
 
 
 Vue.component('service-row', {
-    props: ['service', 'services', 'editMethod', 'preloaderVisibility'],
+    props: ['service', 'services', 'preloaderVisibility'],
     data: function() {
         return {
-            show: this.preloaderVisibility
+            show: this.preloaderVisibility,
+            id: '',
+            name: '',
+            description: '',
+            price: ''
         }
     },
     template:
         '<tr>' +
-        '<td>{{service.name}}</td>' +
-        '<td>{{service.description}}</td>' +
-        '<td>{{service.price}}</td>' +
-        '<td>' +
+        '<td v-if="!show">{{service.name}}</td>' +
+        '<td v-if="!show">{{service.description}}</td>' +
+        '<td v-if="!show">{{service.price}}</td>' +
+        '<td v-if="show"><input type="text" placeholder="Name" v-model="name"/></td>' +
+        '<td v-if="show"><input type="text" placeholder="Description" v-model="description"/></td>' +
+        '<td v-if="show"><input type="text" placeholder="Price" v-model="price"/></td>' +
+        '<td v-if="!show">' +
         '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
+        '</td>' +
+        '<td v-if="show">' +
+        '<img src="/img/plus.png" width="35px" title="Сохранить" @click="save" />' +
         '</td>' +
         '</tr>',
     methods: {
@@ -78,13 +88,34 @@ Vue.component('service-row', {
                 })
         },
         edit: function () {
-            this.editMethod(this.service);
+            this.show = true;
+            this.id = this.service.id
+            this.name = this.service.name
+            this.description = this.service.description
+            this.price = this.service.price
+        },
+        save: function () {
+            var service = {
+                name: this.name,
+                description: this.description,
+                price: this.price,
+            };
+            ServiceAdminApi.update({id: this.id}, service).then(result =>
+                result.json().then(data => {
+                    var index = getIndex(this.services, data.id);
+                    this.services.splice(index,1,data);
+                    this.id = ''
+                    this.name = ''
+                    this.description = ''
+                    this.price = ''
+                    this.show = false
+                }))
         }
     }
 });
 
 Vue.component('add-service', {
-    props:['services', 'serviceAttr', 'preloaderVisibility'],
+    props:['services', 'preloaderVisibility'],
     data: function() {
         return {
             id: '',
@@ -92,14 +123,6 @@ Vue.component('add-service', {
             description: '',
             price: '',
             show: this.preloaderVisibility
-        }
-    },
-    watch: {
-        serviceAttr: function(newVal, oldVal) {
-            this.id = newVal.id;
-            this.name = newVal.name;
-            this.description = newVal.description;
-            this.price = newVal.price;
         }
     },
     template:
@@ -128,19 +151,6 @@ Vue.component('add-service', {
                 description: this.description,
                 price: this.price,
             };
-
-            if (this.id){
-                ServiceAdminApi.update({id: this.id}, service).then(result =>
-                    result.json().then(data => {
-                        var index = getIndex(this.services, data.id);
-                        this.services.splice(index,1,data);
-                        this.id = ''
-                        this.name = ''
-                        this.description = ''
-                        this.price = ''
-                        this.show = false
-                    }))
-            } else {
                 ServiceAdminApi.save({}, service).then(result =>
                     result.json().then(data => {
                             this.services.push(data)
@@ -151,7 +161,6 @@ Vue.component('add-service', {
                         }
                     )
                 )
-            }
         }
     }
 })
@@ -160,7 +169,7 @@ Vue.component('services-list', {
     props: ['services'],
     template:
         '<div>'+
-        '<add-service :services="services" :serviceAttr="service" :preloaderVisibility="preloaderVisibility"/><br>' +
+        '<add-service :services="services" :preloaderVisibility="preloaderVisibility"/><br>' +
         '<table>' +
         '<thead>' +
         '<th colspan="4">Наши услуги</th>' +
@@ -173,19 +182,13 @@ Vue.component('services-list', {
         '</thead>' +
         '<tbody>' +
         '<tr is="service-row" v-for="service in services" :key="service.id" :service="service"' +
-        ':services="services" :editMethod="editMethod" :preloaderVisibility="preloaderVisibility"></tr>' +
+        ':services="services" :preloaderVisibility="preloaderVisibility"></tr>' +
         '</tbody>' +
         '</table>' +
         '</div>',
     data: function() {
         return {
-            service: null,
             preloaderVisibility: false
-        }
-    },
-    methods: {
-        editMethod: function(service) {
-            this.service = service;
         }
     }
 });
