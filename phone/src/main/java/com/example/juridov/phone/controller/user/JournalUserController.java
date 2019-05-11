@@ -46,9 +46,9 @@ public class JournalUserController {
     }
 
     @ApiOperation(value = "Pay the check", response = Journal.class)
-    @RequestMapping(path = "/{journalId}", method = RequestMethod.PUT)
-    public Journal PayTheCheck(@AuthenticationPrincipal User user, @PathVariable Long journalId) {
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
+    public Journal PayTheCheck(@AuthenticationPrincipal User user, @PathVariable Long id) {
         Long phoneId = phoneService.getPhoneByUserId(user.getId()).getId();
-        return journalService.setIsPaid(journalId, phoneId);
+        return journalService.setIsPaid(id, phoneId);
     }
 }

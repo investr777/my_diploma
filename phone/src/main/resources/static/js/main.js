@@ -14,6 +14,7 @@ var JournalAdminApi = Vue.resource('/admin/journal{/id}')
 
 var UserApi = Vue.resource('/user')
 var ServiceUserApi = Vue.resource('/user/service{/id}')
+var JournalUserApi = Vue.resource('/user/journal{/id}')
 
 Vue.component('header-form', {
     template: '<header>' +
@@ -417,6 +418,7 @@ Vue.component('users-list', {
         '<div>' +
             '<div style="padding: 2%">' +
                 '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/service\'">Сервисы</button>' +
+                '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/journal\'">Счета</button>' +
             '</div>' +
             '<table>' +
                 '<thead>' +
@@ -532,6 +534,85 @@ Vue.component('all-services-list', {
 });
 
 
+Vue.component('user-journal-row', {
+    props: ['journal'],
+    template: '<tr v-if="journal.paid">' +
+        '<td>{{journal.phone.phoneNumber}}</td>' +
+        '<td>{{journal.period}}</td>' +
+        '<td>{{journal.price}}</td>' +
+        '<td v-if="journal.paid">Оплачен</td>' +
+        '<td v-else>Не оплачен</td>' +
+        '</tr>'
+});
+
+Vue.component('user-journals-list', {
+    props: ['allJournals'],
+    template:
+        '<div>' +
+        '<table>' +
+        '<thead>' +
+        '<th colspan="4">Оплаченные счета</th>' +
+        '</thead>' +
+        '<thead>' +
+        '<th>Номер телефона</th>' +
+        '<th>Период</th>' +
+        '<th>Сумма</th>' +
+        '<th>Состояние</th>' +
+        '</thead>' +
+        '<tbody>' +
+        '<tr is="user-journal-row" v-for="journal in allJournals" :key="journal.id" :journal="journal"></tr>' +
+        '</tbody>' +
+        '</table>' +
+        '</div>'
+});
+
+
+Vue.component('user-journalWithoutPaid-row', {
+    props: ['journal', 'allJournals'],
+    template: '<tr v-if="!journal.paid">' +
+        '<td>{{journal.phone.phoneNumber}}</td>' +
+        '<td>{{journal.period}}</td>' +
+        '<td>{{journal.price}}</td>' +
+        '<td v-if="journal.paid">Оплачен</td>' +
+        '<td v-else>Не оплачен</td>' +
+        '<td><p style="text-align: center"><img src="/img/oplata.png" width="35px" title="Оплатить" @click="paid" /></p></td>' +
+        '</tr>',
+    methods: {
+        paid: function () {
+            var journalPaid = { paid: true}
+            JournalUserApi.update({id: this.journal.id}, journalPaid)
+                .then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.allJournals, data.id);
+                        this.allJournals.splice(index,1,data);
+                    }))
+        }
+    }
+});
+
+Vue.component('user-journalsWithoutPaid-list', {
+    props: ['allJournals'],
+    template:
+        '<div>' +
+        '<table>' +
+        '<thead>' +
+        '<th colspan="5">Не оплаченные счета</th>' +
+        '</thead>' +
+        '<thead>' +
+        '<th>Номер телефона</th>' +
+        '<th>Период</th>' +
+        '<th>Сумма</th>' +
+        '<th>Состояние</th>' +
+        '<th>Действие</th>' +
+        '</thead>' +
+        '<tbody>' +
+        '<tr is="user-journalWithoutPaid-row" v-for="journal in allJournals"' +
+        ':key="journal.id" :journal="journal" :allJournals="allJournals"></tr>' +
+        '</tbody>' +
+        '</table>' +
+        '</div>'
+});
+
 
 const Main = {
     template: '<div><header-form/>' +
@@ -581,6 +662,28 @@ const UserService = {
         Vue.resource('/user/service/services').get().then(result =>
             result.json().then(data =>
                 data.forEach(service => this.allServices.push(service))))
+    }
+}
+
+const UserJournal = {
+    template: '<div><header-form-user/>' +
+        '<hr class="tab">' +
+        '<br>' +
+        '<user-journalsWithoutPaid-list :allJournals="allJournals"/>' +
+        '<br>' +
+        '<br>' +
+        '<user-journals-list :allJournals="allJournals""/>' +
+        '<footer-form/></div>',
+    data: function() {
+        return {
+            journalsWithoutPaid: [],
+            allJournals: []
+        }
+    },
+    created: function () {
+        JournalUserApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(journal => this.allJournals.push(journal))));
     }
 }
 
@@ -647,6 +750,7 @@ const router = new VueRouter({
         { path: '/admin/journal', component: AdminJournalsWithoutPaid },
         { path: '/user', component: User },
         { path: '/user/service', component: UserService },
+        { path: '/user/journal', component: UserJournal }
     ]
 })
 

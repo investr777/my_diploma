@@ -13,7 +13,6 @@ import java.util.Date;
 public class Journal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @Column(name = "id")
     private Long id;
 
@@ -29,7 +28,7 @@ public class Journal {
     private double price;
 
     @Column(name = "isPaid")
-    private boolean isPaid = false;
+    private boolean paid = false;
 
     public Date getPeriod() {
         return period;
@@ -64,10 +63,10 @@ public class Journal {
     }
 
     public boolean isPaid() {
-        return isPaid;
+        return paid;
     }
 
     public void setPaid(boolean paid) {
-        isPaid = paid;
+        this.paid = paid;
     }
 }
