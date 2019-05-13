@@ -1,5 +1,6 @@
 package com.example.juridov.phone.controller.user;
 
+import com.example.juridov.phone.dto.UserEditPassword;
 import com.example.juridov.phone.entity.Phone;
 import com.example.juridov.phone.entity.User;
 import com.example.juridov.phone.service.PhoneService;
@@ -10,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -36,8 +34,8 @@ public class UserAndPhoneUserController {
     }
 
     @ApiOperation(value = "Edit password of the user", response = User.class)
-    @RequestMapping(path = "/edit", method = RequestMethod.PUT)
-    public User editPasswordUser(@AuthenticationPrincipal User user, @RequestParam String newPassword, @RequestParam String oldPassword) throws Exception {
-        return userService.updateUserPassword(newPassword, oldPassword, user.getId());
+    @RequestMapping(method = RequestMethod.PUT)
+    public User editPasswordUser(@AuthenticationPrincipal User user, @RequestBody UserEditPassword editPassword) throws Exception {
+        return userService.updateUserPassword(editPassword.getNewPassword(), editPassword.getOldPassword(), user.getId());
     }
 }

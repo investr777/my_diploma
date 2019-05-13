@@ -16,6 +16,7 @@ var UserApi = Vue.resource('/user')
 var ServiceUserApi = Vue.resource('/user/service{/id}')
 var JournalUserApi = Vue.resource('/user/journal{/id}')
 
+
 Vue.component('header-form', {
     template: '<header>' +
         '<div align="right"><a href="/login" class="right">Войти в личный кабинет</a></div>' +
@@ -28,9 +29,15 @@ Vue.component('header-form-admin', {
     template: '<header>' +
         '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
         '<div align="right">Администратор</div>' +
-        '<a href="/#/admin"><img src="/img/logo.png"></a>' +
+        '<img style="cursor: pointer" title="На главную" src="/img/logo.png" @click="reload">' +
         '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
-        '</header>'
+        '</header>',
+    methods: {
+        reload: function () {
+            this.$router.push({path: '/user'})
+            window.location.reload()
+        }
+    }
 });
 
 Vue.component('header-form-user', {
@@ -38,9 +45,15 @@ Vue.component('header-form-user', {
     template: '<header>' +
         '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
         '<div align="right" v-for="phone in userPhone">{{ phone.user.fullName }}</div>' +
-        '<a href="/#/user"><img src="/img/logo.png"></a>' +
+        '<img style="cursor: pointer" title="На главную" src="/img/logo.png" @click="reload">' +
         '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
-        '</header>'
+        '</header>',
+    methods: {
+        reload: function () {
+            this.$router.push({path: '/user'})
+            window.location.reload()
+        }
+    }
 });
 
 Vue.component('footer-form', {
@@ -557,11 +570,30 @@ Vue.component('user-row', {
 
 Vue.component('users-list', {
     props: ['userPhone'],
+    data: function() {
+            return {
+                id: '',
+                oldPassword: '',
+                newPassword: '',
+                show: false,
+                pass: false
+            }
+        }
+    ,
     template:
         '<div>' +
-            '<div style="padding: 2%">' +
+            '<div v-if="!show" style="padding: 2%">' +
                 '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/service\'">Сервисы</button>' +
                 '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/journal\'">Счета</button>' +
+                '<button style="margin: 0px 10px" class="button" @click="edit">Изменить пароль</button>' +
+            '</div>' +
+            '<div v-if="pass" style="padding: 2%"><label>Старый пароль введен неверно!</label></div>' +
+            '<div v-if="show" style="padding: 2%">' +
+                '<label>Старый пароль: </label>' +
+                '<input id="oldPassword" type="password" placeholder="Old password" v-model="oldPassword" />' +
+                '<label> Новый пароль: </label>' +
+                '<input id="newPassword" type="password" placeholder="New password" v-model="newPassword" />' +
+                '<button style="margin: 0px 10px" class="button" @click="save">Сохранить</button>' +
             '</div>' +
             '<table>' +
                 '<thead>' +
@@ -577,7 +609,47 @@ Vue.component('users-list', {
                     '<tr is="user-row" v-for="phone in userPhone" :key="phone.id" :phone="phone"></tr>' +
                 '</tbody>' +
             '</table>' +
-        '</div>'
+        '</div>',
+    methods: {
+        edit: function() {
+            this.show = true;
+            this.id = this.userPhone[0].user.id
+        },
+        save: function () {
+            if (this.oldPassword === '' || this.newPassword === '') {
+                alert("Заполните все поля")
+                if (this.oldPassword === '') {
+                    document.getElementById('oldPassword').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('oldPassword').style.backgroundColor = "#ffffff"
+                }
+                if (this.newPassword === '') {
+                    document.getElementById('newPassword').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('newPassword').style.backgroundColor = "#ffffff"
+                }
+            } else {
+                var user = {
+                    oldPassword: this.oldPassword,
+                    newPassword: this.newPassword
+                }
+                UserApi.update({id: this.id}, user).then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.userPhone, data.id);
+                        this.userPhone.splice(index, 1, data);
+                        this.$router.push({path: '/'})
+                        alert("Пароль успешно изменен! Авторизируйтесь используя новый пароль.")
+                    })
+                ).catch(error => {
+                    this.pass = true
+                    document.getElementById('oldPassword').focus()
+                    document.getElementById('oldPassword').style.backgroundColor = "#FF0000"
+                    this.oldPassword = ''
+                    this.newPassword = ''
+                })
+            }
+        }
+    }
 });
 
 
