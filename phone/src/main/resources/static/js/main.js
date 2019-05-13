@@ -7,7 +7,6 @@ function getIndex(list, id) {
     return -1;
 }
 
-var ServiceApi = Vue.resource('/services')
 var AdminApi = Vue.resource('/admin{/id}')
 var ServiceAdminApi = Vue.resource('/admin/service{/id}')
 var JournalAdminApi = Vue.resource('/admin/journal{/id}')
@@ -19,22 +18,26 @@ var JournalUserApi = Vue.resource('/user/journal{/id}')
 
 Vue.component('header-form', {
     template: '<header>' +
-        '<div align="right"><a href="/login" class="right">Войти в личный кабинет</a></div>' +
+        '<button class="buttonEnter" style="float: right" onclick="location.href = \'/login\'">Войти в личный кабинет</button>' +
         '<a href="/"><img src="/img/logo.png"></a>' +
-        '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
+        '<br>' +
+        '<br>' +
+        '<img src="/img/text.png" width="100%"/>' +
         '</header>'
 });
 
 Vue.component('header-form-admin', {
     template: '<header>' +
-        '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
         '<div align="right">Администратор</div>' +
+        '<div><button class="buttonExit" style="float: right" onclick="location.href = \'/logout\'">Выйти</button></div>' +
         '<img style="cursor: pointer" title="На главную" src="/img/logo.png" @click="reload">' +
-        '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
+        '<br>' +
+        '<br>' +
+        '<img src="/img/text.png" width="100%"/>' +
         '</header>',
     methods: {
         reload: function () {
-            this.$router.push({path: '/user'})
+            this.$router.push({path: '/admin'})
             window.location.reload()
         }
     }
@@ -43,10 +46,12 @@ Vue.component('header-form-admin', {
 Vue.component('header-form-user', {
     props: ['userPhone'],
     template: '<header>' +
-        '<div align="right"><a href="/logout" class="right">Покинуть личный кабинет</a></div>' +
         '<div align="right" v-for="phone in userPhone">{{ phone.user.fullName }}</div>' +
+        '<div><button class="buttonExit" style="float: right" onclick="location.href = \'/logout\'">Выйти</button></div>' +
         '<img style="cursor: pointer" title="На главную" src="/img/logo.png" @click="reload">' +
-        '<h2 align="center">Вас приветствует телефонная станция, Miron Phones!</h2>' +
+        '<br>' +
+        '<br>' +
+        '<img src="/img/text.png" width="100%"/>' +
         '</header>',
     methods: {
         reload: function () {
@@ -679,6 +684,11 @@ Vue.component('user-service-row', {
 
 Vue.component('user-services-list', {
     props: ['userServices'],
+    // data: function(){
+    //     return {
+    //         totalCost: this.userServices[0]
+    //     }
+    // },
     template:
         '<div>'+
         '<table>' +
@@ -694,6 +704,9 @@ Vue.component('user-services-list', {
         '<tbody>' +
         '<tr is="user-service-row" v-for="service in userServices" :key="service.id" :userService="service"' +
         ':userServices="userServices"></tr>' +
+        '<th colspan="4" v-if="this.userServices.length === 0">У вас нет подключенных услуг</th>' +
+        // '<th colspan="2" v-if="this.userServices.length !== 0">Общая стоимость:</th>' +
+        // '<th style="text-align: left" v-if="this.userServices.length !== 0">{{this.totalCost}}</th>' +
         '</tbody>' +
         '</table>' +
         '</div>',
@@ -833,7 +846,9 @@ const Main = {
     template: '<div><header-form/>' +
         '<hr class="tab">' +
         '<br>' +
-        // '<services-list/>' +
+        '<img src="/img/1.png" width="100%"/>' +
+        '<br>' +
+        '<img src="/img/2.png" width="100%"/>' +
         '<footer-form/></div>'
 }
 
