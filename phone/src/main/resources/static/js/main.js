@@ -541,23 +541,103 @@ Vue.component('phones-list', {
         '<th colspan="5">Наши абоненты</th>' +
         '</thead>' +
         '<thead>' +
-        '<th width="22%">ФИО</th>' +
+        '<th width="22%">ФИО ' +
+        '<img @click="sortParam=\'fullNameDown\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сортировать по порядку"/>' +
+        '<img @click="sortParam=\'fullNameUp\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сортировать в обратном порядке"/> ' +
+        '<input style="width: 80%" type="text" v-model="fullName"/></th>' +
         '<th width="29%">Адрес</th>' +
-        '<th width="15%">Номер телефона</th>' +
-        '<th width="19%">Статус</th>' +
+        '<th width="15%">Номер телефона ' +
+        '<img @click="sortParam=\'phoneNumberDown\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сортировать по порядку"/>' +
+        '<img @click="sortParam=\'phoneNumberUp\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сортировать в обратном порядке"/> ' +
+        '</th>' +
+        '<th width="19%">Статус ' +
+        '<img @click="sortParam=\'activeUp\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сначала активные"/>' +
+        '<img @click="sortParam=\'activeDown\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сначала заблокированные"/> ' +
+        '</th>' +
         '<th width="15%">Действия</th>' +
         '</thead>' +
         '<tbody>' +
-        '<tr is="phone-row" v-for="phone in phones" :key="phone.id" :phone="phone" ' +
+        '<tr is="phone-row" v-for="phone in filteredList" :key="phone.id" :phone="phone" ' +
         ':phones="phones" :preloaderVisibility="preloaderVisibility"></tr>' +
         '</tbody>' +
         '</table>' +
         '</div>',
     data: function() {
         return {
-            preloaderVisibility: false
+            sortParam: '',
+            fullName:'',
+            preloaderVisibility: false,
+            sortByFullNameDown: function (d1, d2) {return (d1.user.fullName > d2.user.fullName) ? 1 : -1;},
+            sortByFullNameUp: function (d1, d2) {return (d1.user.fullName > d2.user.fullName) ? -1 : 1;},
+            sortByPhoneNumberDown: function (d1, d2) {return (d1.phoneNumber > d2.phoneNumber) ? 1 : -1;},
+            sortByPhoneNumberUp: function (d1, d2) {return (d1.phoneNumber > d2.phoneNumber) ? -1 : 1;},
+            sortByActiveDown: function (d1, d2) {return (d1.active > d2.active) ? 1 : -1;},
+            sortByActiveUp: function (d1, d2) {return (d1.active > d2.active) ? -1 : 1;}
         }
-    }
+    },
+        computed: {
+            filteredList: function () {
+                var fullName = this.fullName;
+                // return this.phones.filter(function (elem) {
+                //     if(fullName===''){
+                //         return true;
+                //     } else{
+                //         return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                //     }
+                // })
+                switch(this.sortParam){
+                    case 'fullNameDown': return this.phones.sort(this.sortByFullNameDown).filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    });
+                    case 'fullNameUp': return this.phones.sort(this.sortByFullNameUp).filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    });
+                    case 'phoneNumberDown': return this.phones.sort(this.sortByPhoneNumberDown).filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    });
+                    case 'phoneNumberUp': return this.phones.sort(this.sortByPhoneNumberUp.filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    }));
+                    case 'activeDown': return this.phones.sort(this.sortByActiveDown).filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    });
+                    case 'activeUp': return this.phones.sort(this.sortByActiveUp).filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    });
+                    default: return this.phones.filter(function (elem) {
+                        if(fullName===''){
+                            return true;
+                        } else{
+                            return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
+                        }
+                    });
+                }
+            }
+        }
 });
 
 
