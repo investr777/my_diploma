@@ -578,13 +578,6 @@ Vue.component('phones-list', {
         computed: {
             filteredList: function () {
                 var fullName = this.fullName;
-                // return this.phones.filter(function (elem) {
-                //     if(fullName===''){
-                //         return true;
-                //     } else{
-                //         return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
-                //     }
-                // })
                 switch(this.sortParam){
                     case 'fullNameDown': return this.phones.sort(this.sortByFullNameDown).filter(function (elem) {
                         if(fullName===''){
@@ -764,11 +757,6 @@ Vue.component('user-service-row', {
 
 Vue.component('user-services-list', {
     props: ['userServices'],
-    // data: function(){
-    //     return {
-    //         totalCost: this.userServices[0]
-    //     }
-    // },
     template:
         '<div>'+
         '<table>' +
@@ -785,8 +773,6 @@ Vue.component('user-services-list', {
         '<tr is="user-service-row" v-for="service in userServices" :key="service.id" :userService="service"' +
         ':userServices="userServices"></tr>' +
         '<th colspan="4" v-if="this.userServices.length === 0">У вас нет подключенных услуг</th>' +
-        // '<th colspan="2" v-if="this.userServices.length !== 0">Общая стоимость:</th>' +
-        // '<th style="text-align: left" v-if="this.userServices.length !== 0">{{this.totalCost}}</th>' +
         '</tbody>' +
         '</table>' +
         '</div>',
@@ -869,6 +855,7 @@ Vue.component('user-journals-list', {
         '</thead>' +
         '<tbody>' +
         '<tr is="user-journal-row" v-for="journal in allJournals" :key="journal.id" :journal="journal"></tr>' +
+        '<th colspan="4" v-if="this.allJournals.length === 0">Список пуст</th>' +
         '</tbody>' +
         '</table>' +
         '</div>'
@@ -904,7 +891,7 @@ Vue.component('user-journalsWithoutPaid-list', {
         '<div>' +
         '<table>' +
         '<thead>' +
-        '<th colspan="5">Не оплаченные счета</th>' +
+        '<th colspan="5">Неоплаченные счета</th>' +
         '</thead>' +
         '<thead>' +
         '<th>Номер телефона</th>' +
@@ -978,6 +965,7 @@ const UserService = {
 const UserJournal = {
     template: '<div><header-form-user/>' +
         '<hr class="tab">' +
+        '<button @click="report">Отчет</button>' +
         '<br>' +
         '<user-journalsWithoutPaid-list :allJournals="allJournals"/>' +
         '<br>' +
@@ -994,6 +982,24 @@ const UserJournal = {
         JournalUserApi.get().then(result =>
             result.json().then(data =>
                 data.forEach(journal => this.allJournals.push(journal))));
+    },
+    methods: {
+        report: function () {
+            var doc = new jsPDF();
+            var column = [
+                {title: "Period", dataKey: "period"},
+                {title: "Price", dataKey: "price"},
+                {title: "Paid", dataKey: "paid"}
+            ];
+
+            var imgData = new Image();
+            imgData.src = '/img/logo.png'
+            doc.addImage(imgData, 'PNG', 0, 0)
+            doc.setFontSize(40);
+            doc.text(35, 25, "Octonyan loves jsPDF")
+            doc.autoTable(column, this.allJournals, {margin: {top: 80}});
+            doc.save('report.pdf')
+        }
     }
 }
 
