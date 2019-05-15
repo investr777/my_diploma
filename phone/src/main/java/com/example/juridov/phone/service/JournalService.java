@@ -36,6 +36,17 @@ public class JournalService {
         return notPaid;
     }
 
+    public List<Journal> getPaid() {
+        List<Journal> paid = new ArrayList<>();
+        List<Journal> listFromDB = journalRepository.findAll();
+        for (Journal journal : listFromDB) {
+            if (journal.isPaid()) {
+                paid.add(journal);
+            }
+        }
+        return paid;
+    }
+
     public List<Journal> getNotPaidByPhone(Long phoneId) {
         List<Journal> notPaidByPhone = new ArrayList<>();
         for (Journal journal : getNotPaid()) {
@@ -44,6 +55,16 @@ public class JournalService {
             }
         }
         return notPaidByPhone;
+    }
+
+    public List<Journal> getPaidByPhone(Long phoneId) {
+        List<Journal> paidByPhone = new ArrayList<>();
+        for (Journal journal : getPaid()) {
+            if (journal.getPhone().getId() == phoneId) {
+                paidByPhone.add(journal);
+            }
+        }
+        return paidByPhone;
     }
 
     public Journal addJournal(Journal journal, Long phoneId) {

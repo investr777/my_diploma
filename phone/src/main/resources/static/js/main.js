@@ -965,7 +965,7 @@ const UserService = {
 const UserJournal = {
     template: '<div><header-form-user/>' +
         '<hr class="tab">' +
-        '<button @click="report">Отчет</button>' +
+        '<button style="margin:10px" class="button" @click="report">Выгрузить в PDF</button>' +
         '<br>' +
         '<user-journalsWithoutPaid-list :allJournals="allJournals"/>' +
         '<br>' +
@@ -975,29 +975,42 @@ const UserJournal = {
     data: function() {
         return {
             journalsWithoutPaid: [],
-            allJournals: []
+            allJournals: [],
+            journalNoPaid: [],
+            journalPaid: []
         }
     },
     created: function () {
         JournalUserApi.get().then(result =>
             result.json().then(data =>
                 data.forEach(journal => this.allJournals.push(journal))));
+        Vue.resource('/user/journal/noPaid').get().then(result =>
+            result.json().then(data =>
+                data.forEach(journal => this.journalNoPaid.push(journal))));
+        Vue.resource('/user/journal/paid').get().then(result =>
+            result.json().then(data =>
+                data.forEach(journal => this.journalPaid.push(journal))));
     },
     methods: {
         report: function () {
             var doc = new jsPDF();
+            var logo = new Image();
+            logo.src = '/img/logo.png'
+            var withoutPaid = new Image();
+            withoutPaid.src = '/img/top.png'
+            var paid = new Image();
+            paid.src = '/img/top1.png'
             var column = [
-                {title: "Period", dataKey: "period"},
-                {title: "Price", dataKey: "price"},
-                {title: "Paid", dataKey: "paid"}
+                {dataKey: "period"},
+                {dataKey: "price"},
             ];
-
-            var imgData = new Image();
-            imgData.src = '/img/logo.png'
-            doc.addImage(imgData, 'PNG', 0, 0)
-            doc.setFontSize(40);
-            doc.text(35, 25, "Octonyan loves jsPDF")
-            doc.autoTable(column, this.allJournals, {margin: {top: 80}});
+            doc.addImage(logo, 'PNG',0, 0)
+            doc.addImage(withoutPaid, 'PNG', 13, 30)
+            doc.autoTable(column, this.journalNoPaid, {margin: {top: 60}});
+            doc.addPage()
+            doc.addImage(logo, 'PNG',0, 0)
+            doc.addImage(paid, 'PNG',13, 30)
+            doc.autoTable(column, this.journalPaid,{margin: {top: 60}});
             doc.save('report.pdf')
         }
     }
