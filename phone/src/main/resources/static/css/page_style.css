@@ -32,10 +32,6 @@ nav ul li{
 	padding: 5px 0px 5px 30px;
 }
 
-li {
-	list-style-image: url(img/check.png);
-}
-
 nav ul li a:link, nav ul li a:visited{
 	color: #0067a5;
 	text-decoration: none;

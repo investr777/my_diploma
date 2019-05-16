@@ -8,12 +8,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    @Autowired
+    private MailSender mailSender;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -31,6 +35,16 @@ public class UserService implements UserDetailsService {
     public User addUser(User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             return user;
+        }
+        user.setActivationCode(UUID.randomUUID().toString());
+        if (!StringUtils.isEmpty(user.getEmail())) {
+            String message = String.format(
+                    "Hello, %s! \n" +
+                            "Welcome to Miron Phone. Please, visit next link: http://localhost:8080/activate/%s",
+                    user.getUsername(),
+                    user.getActivationCode()
+            );
+            mailSender.send(user.getEmail(), "Activation code", message);
         }
         return userRepository.save(user);
     }
@@ -57,8 +71,6 @@ public class UserService implements UserDetailsService {
         if (password != null) {
             if (BCrypt.checkpw(oldPassword, userFromDB.getPassword())) {
                 userFromDB.setPassword(password);
-            } else {
-                throw new Exception("Wrong old password!");
             }
         }
         return userRepository.save(userFromDB);
@@ -67,5 +79,19 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username);
+    }
+
+    public boolean activateUser(String code) {
+        User user = userRepository.findByActivationCode(code);
+        if (user == null){
+            return false;
+        }
+
+        user.setActivationCode(null);
+        user.setActive(true);
+
+        userRepository.save(user);
+
+        return true;
     }
 }

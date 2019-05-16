@@ -7,6 +7,8 @@ function getIndex(list, id) {
     return -1;
 }
 
+var RegistrationApi = Vue.resource('/registration')
+
 var AdminApi = Vue.resource('/admin{/id}')
 var ServiceAdminApi = Vue.resource('/admin/service{/id}')
 var JournalAdminApi = Vue.resource('/admin/journal{/id}')
@@ -175,7 +177,8 @@ Vue.component('add-service', {
             name: '',
             description: '',
             price: '',
-            show: this.preloaderVisibility
+            show: this.preloaderVisibility,
+            errors: []
         }
     },
     template:
@@ -183,6 +186,13 @@ Vue.component('add-service', {
         '<div v-if="!show" style="padding: 2%">' +
         '<button class="button" @click="show = true">Добавить сервис</button>' +
         '</div>' +
+        '<form @submit="checkForm" novalidate="true">' +
+        ' <p v-if="errors.length">' +
+        '    <b>Заполните корректно поля:</b>' +
+        '    <ul>' +
+        '      <li v-for="error in errors">{{ error }}</li>' +
+        '    </ul>' +
+        '  </p>' +
         '<table v-if="show">' +
         '<tr>' +
         '<td>Название: </td>' +
@@ -193,9 +203,10 @@ Vue.component('add-service', {
         '<tr>' +
         '<td>Описание: </td>' +
         '<td colspan="2"><input id="description" type="text" placeholder="Description" v-model="description"/></td>' +
-        '<td align="center"><button class="button" @click="save">Сохранить</button></td>' +
+        '<td align="center"><button class="button">Сохранить</button></td>' +
         '</tr>' +
         '</table>' +
+        '</form>' +
         '</div>',
     methods: {
         isDouble: function(evt) {
@@ -214,9 +225,18 @@ Vue.component('add-service', {
                 return true;
             }
         },
-        save: function () {
+        checkForm: function (e) {
+            this.errors = [];
+            if (!this.name) {
+                this.errors.push('Укажите название.');
+            }
+            if (!this.description) {
+                this.errors.push('Укажите описание.');
+            }
+            if (!this.price) {
+                this.errors.push('Укажите стоимость.');
+            }
             if (this.name === '' || this.price === '' || this.description === '') {
-                alert("Заполните все поля")
                 if (this.name === '') {
                     document.getElementById('name').style.backgroundColor = "#FF0000"
                 } else {
@@ -232,7 +252,8 @@ Vue.component('add-service', {
                 } else {
                     document.getElementById('description').style.backgroundColor = "#ffffff"
                 }
-            } else {
+            }
+            if (!this.errors.length) {
                 var service = {
                     name: this.name,
                     description: this.description,
@@ -248,7 +269,9 @@ Vue.component('add-service', {
                         }
                     )
                 )
+                return true;
             }
+            e.preventDefault();
         }
     }
 })
@@ -434,16 +457,24 @@ Vue.component('add-phone', {
             fullName: '',
             address: '',
             phoneNumber: '',
-            show: this.preloaderVisibility
+            show: this.preloaderVisibility,
+            errors: []
         }
     },
     template:
         '<div>' +
         '<div v-if="!show" style="padding: 2%">' +
         '<button style="margin: 0px 10px" class="button" @click="show = true">Добавить абонента</button>' +
-        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/admin/service\'">Сервисы</button>' +
-        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/admin/journal\'">Неоплаченные счета</button>' +
+        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/service\'">Сервисы</button>' +
+        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/journal\'">Неоплаченные счета</button>' +
         '</div>' +
+        '<form @submit="checkForm" novalidate="true">' +
+        ' <p v-if="errors.length">' +
+        '    <b>Заполните корректно поля:</b>' +
+        '    <ul>' +
+        '      <li v-for="error in errors">{{ error }}</li>' +
+        '    </ul>' +
+        '  </p>' +
         '<table v-if="show">' +
         '<tr>' +
         '<td width="15%">Логин</td>' +
@@ -461,9 +492,10 @@ Vue.component('add-phone', {
         '<td width="15%">Телефонный номер: </td>' +
         '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
         ' @keypress="isNumber($event)" maxlength="12"/></td>' +
-        '<td width="50%" colspan="2" align="center"><button class="button" @click="save">Сохранить</button></td>' +
+        '<td width="50%" colspan="2" align="center"><button class="button">Сохранить</button></td>' +
         '</tr>' +
         '</table>' +
+        '</form>' +
         '</div>',
     methods: {
         isNumber: function(evt) {
@@ -475,10 +507,25 @@ Vue.component('add-phone', {
                 return true;
             }
         },
-        save: function () {
+        checkForm: function (e) {
+            this.errors = [];
+            if (!this.username) {
+                this.errors.push('Укажите login.');
+            }
+            if (!this.password) {
+                this.errors.push('Укажите пароль.');
+            }
+            if (!this.fullName) {
+                this.errors.push('Укажите ФИО.');
+            }
+            if (!this.address) {
+                this.errors.push('Укажите адрес.');
+            }
+            if (!this.phoneNumber) {
+                this.errors.push('Укажите номер.');
+            }
             if (this.username === '' || this.password === '' || this.address === ''
-                || this.fullName === '' || this.phoneNumber === '') {
-                alert("Заполните все поля")
+                || this.fullName === '' || this.phoneNumber === '' || this.email === '') {
                 if (this.username === '') {
                     document.getElementById('username').style.backgroundColor = "#FF0000"
                 } else {
@@ -504,17 +551,19 @@ Vue.component('add-phone', {
                 } else {
                     document.getElementById('phoneNumber').style.backgroundColor = "#ffffff"
                 }
-            } else {
+            }
+            if (!this.errors.length) {
                 var phone = {
                     phoneNumber: this.phoneNumber,
                     user: {
                         username: this.username,
                         password: this.password,
                         fullName: this.fullName,
-                        address: this.address
+                        address: this.address,
+                        active: true
                     }
                 };
-                AdminApi.save({}, phone).then(result =>
+                RegistrationApi.save({}, phone).then(result =>
                     result.json().then(data => {
                             this.phones.push(data)
                             this.username = ''
@@ -526,7 +575,9 @@ Vue.component('add-phone', {
                         }
                     )
                 )
+                return true;
             }
+            e.preventDefault();
         }
     }
 })
@@ -600,13 +651,13 @@ Vue.component('phones-list', {
                             return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
                         }
                     });
-                    case 'phoneNumberUp': return this.phones.sort(this.sortByPhoneNumberUp.filter(function (elem) {
+                    case 'phoneNumberUp': return this.phones.sort(this.sortByPhoneNumberUp).filter(function (elem) {
                         if(fullName===''){
                             return true;
                         } else{
                             return elem.user.fullName.toLowerCase().indexOf(fullName) > -1;
                         }
-                    }));
+                    });
                     case 'activeDown': return this.phones.sort(this.sortByActiveDown).filter(function (elem) {
                         if(fullName===''){
                             return true;
@@ -654,25 +705,35 @@ Vue.component('users-list', {
                 oldPassword: '',
                 newPassword: '',
                 show: false,
-                pass: false
+                pass: false,
+                errors: []
             }
         }
     ,
     template:
         '<div>' +
-            '<div v-if="!show" style="padding: 2%">' +
-                '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/service\'">Сервисы</button>' +
-                '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/user/journal\'">Счета</button>' +
+        '<h2 align="center" v-for="phone in userPhone" v-if="!phone.user.active">Активируйте аккаунт по email</h2>' +
+            '<div v-else><div v-if="!show" style="padding: 2%">' +
+                '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/user/service\'">Сервисы</button>' +
+                '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/user/journal\'">Счета</button>' +
                 '<button style="margin: 0px 10px" class="button" @click="edit">Изменить пароль</button>' +
             '</div>' +
             '<div v-if="pass" style="padding: 2%"><label>Старый пароль введен неверно!</label></div>' +
+            '<form @submit="checkForm">' +
+            ' <p v-if="errors.length">' +
+            '    <b>Заполните корректно поля:</b>' +
+            '    <ul>' +
+            '      <li v-for="error in errors">{{ error }}</li>' +
+            '    </ul>' +
+            '  </p>' +
             '<div v-if="show" style="padding: 2%">' +
                 '<label>Старый пароль: </label>' +
                 '<input id="oldPassword" type="password" placeholder="Old password" v-model="oldPassword" />' +
                 '<label> Новый пароль: </label>' +
                 '<input id="newPassword" type="password" placeholder="New password" v-model="newPassword" />' +
-                '<button style="margin: 0px 10px" class="button" @click="save">Сохранить</button>' +
+                '<button style="margin: 0px 10px" class="button">Сохранить</button>' +
             '</div>' +
+            '</form>' +
             '<table>' +
                 '<thead>' +
                     '<th colspan="4">Информация о вашем телефонном номере</th>' +
@@ -687,15 +748,22 @@ Vue.component('users-list', {
                     '<tr is="user-row" v-for="phone in userPhone" :key="phone.id" :phone="phone"></tr>' +
                 '</tbody>' +
             '</table>' +
+        '</div>' +
         '</div>',
     methods: {
         edit: function() {
             this.show = true;
             this.id = this.userPhone[0].user.id
         },
-        save: function () {
+        checkForm: function (e) {
+            this.errors = [];
+            if (!this.oldPassword) {
+                this.errors.push('Укажите login.');
+            }
+            if (!this.newPassword) {
+                this.errors.push('Укажите пароль.');
+            }
             if (this.oldPassword === '' || this.newPassword === '') {
-                alert("Заполните все поля")
                 if (this.oldPassword === '') {
                     document.getElementById('oldPassword').style.backgroundColor = "#FF0000"
                 } else {
@@ -706,7 +774,8 @@ Vue.component('users-list', {
                 } else {
                     document.getElementById('newPassword').style.backgroundColor = "#ffffff"
                 }
-            } else {
+            }
+            if (!this.errors.length) {
                 var user = {
                     oldPassword: this.oldPassword,
                     newPassword: this.newPassword
@@ -725,8 +794,10 @@ Vue.component('users-list', {
                     this.oldPassword = ''
                     this.newPassword = ''
                 })
+                return true;
             }
-        }
+            e.preventDefault();
+        },
     }
 });
 
@@ -913,6 +984,7 @@ const Main = {
     template: '<div><header-form/>' +
         '<hr class="tab">' +
         '<br>' +
+        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/registration\'">Присоедениться к нам!</button>' +
         '<img src="/img/1.png" width="100%"/>' +
         '<br>' +
         '<img src="/img/2.png" width="100%"/>' +
@@ -927,7 +999,7 @@ const User = {
         '<footer-form/></div>',
     data: function() {
         return {
-            userPhone: []
+            userPhone: [],
         }
     },
     created: function () {
@@ -1070,6 +1142,155 @@ const AdminJournalsWithoutPaid = {
     }
 }
 
+const Registration = {
+    data: function() {
+        return {
+            id: '',
+            username: '',
+            password: '',
+            fullName: '',
+            address: '',
+            phoneNumber: '',
+            email: '',
+            phones: [],
+            errors: []
+        }
+    },
+    template: '<div><header-form/>' +
+        '<hr class="tab">' +
+        '<br>' +
+        '<form @submit="checkForm" action="/" novalidate="true">' +
+        ' <p v-if="errors.length">' +
+        '    <b>Заполните корректно поля:</b>' +
+        '    <ul>' +
+        '      <li v-for="error in errors">{{ error }}</li>' +
+        '    </ul>' +
+        '  </p>' +
+        '<table>' +
+        '<tr>' +
+        '<td width="15%">Логин</td>' +
+        '<td width="35%"><input id="username" type="text" placeholder="Username" v-model="username"/></td>' +
+        '<td width="15%">Пароль</td>' +
+        '<td width="35%"><input id="password" type="password" placeholder="Password" v-model="password"/></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td width="15%">ФИО</td>' +
+        '<td width="35%"><input id="fullName" type="text" placeholder="Full name" v-model="fullName"/></td>' +
+        '<td width="15%">Адрес</td>' +
+        '<td width="35%"><input id="address" type="text" placeholder="Address" v-model="address"/></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td width="15%">Email</td>' +
+        '<td width="35%"><input id="email" type="text" placeholder="Email" v-model="email"/></td>' +
+        '<td width="15%">Телефонный номер: </td>' +
+        '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
+        ' @keypress="isNumber($event)" maxlength="12"/></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td width="50%" colspan="2" align="center"><button class="button" >Сохранить</button></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '<footer-form/></div>',
+    methods: {
+        isNumber: function(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
+        checkForm: function (e) {
+            this.errors = [];
+            if (!this.username) {
+                this.errors.push('Укажите login.');
+            }
+            if (!this.password) {
+                this.errors.push('Укажите пароль.');
+            }
+            if (!this.fullName) {
+                this.errors.push('Укажите ФИО.');
+            }
+            if (!this.address) {
+                this.errors.push('Укажите адрес.');
+            }
+            if (!this.phoneNumber) {
+                this.errors.push('Укажите номер.');
+            }
+            if (!this.email) {
+                this.errors.push('Укажите электронную почту.');
+            } else if (!this.validEmail(this.email)) {
+                this.errors.push('Укажите корректный адрес электронной почты.');
+            }
+            if (this.username === '' || this.password === '' || this.address === ''
+                || this.fullName === '' || this.phoneNumber === '' || this.email === '') {
+                if (this.username === '') {
+                    document.getElementById('username').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('username').style.backgroundColor = "#ffffff"
+                }
+                if (this.password === '') {
+                    document.getElementById('password').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('password').style.backgroundColor = "#ffffff"
+                }
+                if (this.fullName === '') {
+                    document.getElementById('fullName').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('fullName').style.backgroundColor = "#ffffff"
+                }
+                if (this.address === '') {
+                    document.getElementById('address').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('address').style.backgroundColor = "#ffffff"
+                }
+                if (this.phoneNumber === '') {
+                    document.getElementById('phoneNumber').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('phoneNumber').style.backgroundColor = "#ffffff"
+                }
+                if (this.email === '') {
+                    document.getElementById('email').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('email').style.backgroundColor = "#ffffff"
+                }
+            }
+            if (!this.errors.length) {
+                var phone = {
+                    phoneNumber: this.phoneNumber,
+                    user: {
+                        username: this.username,
+                        password: this.password,
+                        fullName: this.fullName,
+                        address: this.address,
+                        email: this.email
+                    }
+                };
+                RegistrationApi.save({}, phone).then(result =>
+                    result.json().then(data => {
+                            this.phones.push(data)
+                            this.username = ''
+                            this.password = ''
+                            this.fullName = ''
+                            this.address = ''
+                            this.phoneNumber = ''
+                            this.email = ''
+                        }
+                    )
+                )
+                return true;
+            }
+            e.preventDefault();
+        },
+        validEmail: function (email) {
+            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email);
+        }
+    }
+}
+
 const router = new VueRouter({
     // mode: 'history',
     routes: [
@@ -1079,7 +1300,8 @@ const router = new VueRouter({
         { path: '/admin/journal', component: AdminJournalsWithoutPaid },
         { path: '/user', component: User },
         { path: '/user/service', component: UserService },
-        { path: '/user/journal', component: UserJournal }
+        { path: '/user/journal', component: UserJournal },
+        { path: '/registration', component: Registration }
     ]
 })
 

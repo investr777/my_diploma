@@ -50,6 +50,8 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         user1.setPassword("111");
         user1.setFullName("Egorov Aleksandr Petrovich");
         user1.setAddress("Vitebsk, pr-t Chernyahovskogo 6-18");
+        user1.setActive(true);
+        user1.setEmail("user1@user.ru");
         user1.setRole(Role.USER);
         userRepository.save(user1);
         Phone phone1 = new Phone();
@@ -64,6 +66,8 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         user2.setPassword("222");
         user2.setFullName("Petrov Kirill Olegovich");
         user2.setAddress("Vitebsk, st. Chkalova 5-112");
+        user2.setActive(true);
+        user2.setEmail("user2@user.ru");
         user2.setRole(Role.USER);
         userRepository.save(user2);
         Phone phone2 = new Phone();
@@ -78,6 +82,8 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         user3.setPassword("333");
         user3.setFullName("El'nikova Marina Vladimirovna");
         user3.setAddress("Vitebsk, st. Titovs 76-1-2");
+        user3.setActive(true);
+        user3.setEmail("user3@user.ru");
         user3.setRole(Role.USER);
         userRepository.save(user3);
         Phone phone3 = new Phone();
