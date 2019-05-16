@@ -17,7 +17,7 @@ public class Phone {
     private Long id;
 
     @Column(name = "phoneNumber", unique = true)
-    private Integer phoneNumber;
+    private String phoneNumber;
 
     @Column(name = "isActive")
     private boolean isActive = true;
@@ -58,11 +58,11 @@ public class Phone {
         this.id = id;
     }
 
-    public Integer getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(Integer phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 

@@ -27,7 +27,7 @@ public class PhoneService {
         return phoneRepository.save(phone);
     }
 
-    public Phone getPhoneNumber(Integer phoneNumber) {
+    public Phone getPhoneNumber(String phoneNumber) {
         return phoneRepository.findByPhoneNumber(phoneNumber);
     }
 

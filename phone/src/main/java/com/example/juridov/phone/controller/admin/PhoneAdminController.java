@@ -55,7 +55,7 @@ public class PhoneAdminController {
 
     @ApiOperation(value = "Find by phone number", response = Phone.class)
     @RequestMapping(path = "/findByPhone", method = RequestMethod.GET)
-    public Phone findByPhoneNumber(Integer phoneNumber) {
+    public Phone findByPhoneNumber(String phoneNumber) {
         return phoneService.getPhoneNumber(phoneNumber);
     }
 

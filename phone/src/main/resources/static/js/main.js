@@ -458,7 +458,8 @@ Vue.component('add-phone', {
             address: '',
             phoneNumber: '',
             show: this.preloaderVisibility,
-            errors: []
+            errors: [],
+            findNumber: function (d1, d2) {return (d1.phoneNumber === d2.phoneNumber) ? 1 : -1;}
         }
     },
     template:
@@ -552,30 +553,40 @@ Vue.component('add-phone', {
                     document.getElementById('phoneNumber').style.backgroundColor = "#ffffff"
                 }
             }
-            if (!this.errors.length) {
-                var phone = {
-                    phoneNumber: this.phoneNumber,
-                    user: {
-                        username: this.username,
-                        password: this.password,
-                        fullName: this.fullName,
-                        address: this.address,
-                        active: true
-                    }
-                };
-                RegistrationApi.save({}, phone).then(result =>
-                    result.json().then(data => {
-                            this.phones.push(data)
-                            this.username = ''
-                            this.password = ''
-                            this.fullName = ''
-                            this.address = ''
-                            this.phoneNumber = ''
-                            this.show = false
+            if(this.phones.some(phone => phone.phoneNumber==this.phoneNumber)){
+                this.errors.push("Такой телефонный номер существует!")
+            } else {
+                if (!this.errors.length) {
+                    var phone = {
+                        phoneNumber: this.phoneNumber,
+                        user: {
+                            username: this.username,
+                            password: this.password,
+                            fullName: this.fullName,
+                            address: this.address,
+                            active: true
                         }
-                    )
-                )
-                return true;
+                    };
+                    RegistrationApi.save({}, phone).then(result =>
+                        result.json().then(data => {
+                                this.phones.push(data)
+                                this.username = ''
+                                this.password = ''
+                                this.fullName = ''
+                                this.address = ''
+                                this.phoneNumber = ''
+                                this.show = false
+                            }
+                        )
+                    ).catch(error => {
+                        this.errors.push("Такой login существует!")
+                        document.getElementById('username').focus()
+                        document.getElementById('username').style.backgroundColor = "#FF0000"
+                        this.oldPassword = ''
+                        this.newPassword = ''
+                    })
+                    return true;
+                }
             }
             e.preventDefault();
         }

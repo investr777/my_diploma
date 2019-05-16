@@ -56,7 +56,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         userRepository.save(user1);
         Phone phone1 = new Phone();
         phone1.setUser(user1);
-        phone1.setPhoneNumber(663540);
+        phone1.setPhoneNumber("663540");
         phone1.setActive(true);
         phoneRepository.save(phone1);
 
@@ -72,7 +72,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         userRepository.save(user2);
         Phone phone2 = new Phone();
         phone2.setUser(user2);
-        phone2.setPhoneNumber(332478);
+        phone2.setPhoneNumber("332478");
         phone2.setActive(true);
         phoneRepository.save(phone2);
 
@@ -88,7 +88,7 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         userRepository.save(user3);
         Phone phone3 = new Phone();
         phone3.setUser(user3);
-        phone3.setPhoneNumber(541236);
+        phone3.setPhoneNumber("541236");
         phone3.setActive(true);
         phoneRepository.save(phone3);
 
