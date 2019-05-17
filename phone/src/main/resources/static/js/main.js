@@ -450,10 +450,31 @@ Vue.component('phone-row', {
                     document.getElementById('phoneNumberEdit').style.backgroundColor = "#ffffff"
                 }
             } else {
-                if (this.phones.some(phone => phone.phoneNumber == this.phoneNumber)) {
-                    document.getElementById('phoneNumberEdit').style.backgroundColor = "#FF0000"
-                    alert("Указанный телефон существует!")
-                } else {
+                if (this.phoneNumber !== this.phone.phoneNumber) {
+                    if (this.phones.some(phone => phone.phoneNumber == this.phoneNumber)) {
+                        document.getElementById('phoneNumberEdit').style.backgroundColor = "#FF0000"
+                        alert("Указанный телефон существует!")
+                    } else {
+                        var phone = {
+                            phoneNumber: this.phoneNumber,
+                            user: {
+                                fullName: this.fullName,
+                                address: this.address
+                            }
+                        };
+                        AdminApi.update({id: this.id}, phone).then(result =>
+                            result.json().then(data => {
+                                var index = getIndex(this.phones, data.id);
+                                this.phones.splice(index, 1, data);
+                                this.id = ''
+                                this.fullName = ''
+                                this.address = ''
+                                this.phoneNumber = ''
+                                this.show = false
+                            }))
+                    }
+                }
+                 else {
                 var phone = {
                     phoneNumber: this.phoneNumber,
                     user: {
