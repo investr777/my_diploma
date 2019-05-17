@@ -47,6 +47,17 @@ public class PhoneService {
         if (phone.getPhoneNumber() != null) {
             phoneFromDB.setPhoneNumber(phone.getPhoneNumber());
         }
+        return phoneRepository.save(phoneFromDB);
+    }
+
+    public Phone addUserToPhone(Phone phone, Long phoneId) {
+        Phone phoneFromDB = phoneRepository.findPhoneById(phoneId);
+        if (phoneFromDB == null) {
+            return null;
+        }
+        if (phone.getPhoneNumber() != null) {
+            phoneFromDB.setPhoneNumber(phone.getPhoneNumber());
+        }
         if (phone.getUser() != null){
             phoneFromDB.setUser(phone.getUser());
         }

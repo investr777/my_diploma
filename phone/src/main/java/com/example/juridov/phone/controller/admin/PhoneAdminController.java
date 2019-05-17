@@ -44,8 +44,7 @@ public class PhoneAdminController {
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
     public Phone EditSubscriberWithPhone(@RequestBody Phone phone, @PathVariable Long id) {
         userService.updateDataUser(phone.getUser(), phoneService.findPhoneById(id).getUser().getId());
-//        return phoneService.updateDataPhone(phone, id);
-        return null;
+        return phoneService.updateDataPhone(phone, id);
     }
 
     @ApiOperation(value = "Block phone or Active phone", response = Phone.class)

@@ -47,6 +47,6 @@ public class RegistrationController {
     public Phone EditSubscriberWithPhone(@RequestBody Phone phone) {
         User user = userService.addUser(phone.getUser());
         phone.setUser(user);
-        return phoneService.updateDataPhone(phone, phone.getId());
+        return phoneService.addUserToPhone(phone, phone.getId());
     }
 }
