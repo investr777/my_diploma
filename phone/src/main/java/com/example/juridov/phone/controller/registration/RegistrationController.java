@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/registration", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(value = "USER API", tags = "Registration REST Controller API, registration a new user")
 public class RegistrationController {
     private final UserService userService;
@@ -22,15 +22,16 @@ public class RegistrationController {
     }
 
     @ApiOperation(value = "Registration a new user", response = User.class)
-    @PostMapping
+    @PostMapping(value = "/registration")
     public Phone addNewUser(@RequestBody Phone phone) {
         userService.addUser(phone.getUser());
         return phoneService.addPhoneNumber(phone);
     }
 
-    @GetMapping("/activate/{code}")
-    public void activate(@PathVariable String code){
-        userService.activateUser(code);
+    @ApiOperation(value = "Activate code", response = User.class)
+    @RequestMapping(value = "/activate/{code}",method = RequestMethod.GET)
+    public boolean activate(@PathVariable String code){
+        return userService.activateUser(code);
     }
 
 }

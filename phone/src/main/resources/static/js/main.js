@@ -8,6 +8,7 @@ function getIndex(list, id) {
 }
 
 var RegistrationApi = Vue.resource('/registration')
+var ActivateCodeApi = Vue.resource('/activate{/code}')
 
 var AdminApi = Vue.resource('/admin{/id}')
 var ServiceAdminApi = Vue.resource('/admin/service{/id}')
@@ -360,13 +361,11 @@ Vue.component('phone-row', {
         '<td v-if="!show">{{phone.phoneNumber}}</td>' +
         '<td v-if="show"><input id="phoneNumberEdit" type="text" placeholder="Phone number" v-model="phoneNumber"' +
         ' @keypress="isNumber($event)" maxlength="12"/></td>' +
-        '<td v-if="phone.active">Активен</td>' +
-        '<td v-else>Заблокирован</td>' +
+        '<td v-if="phone.active"><img src="/img/unblock.png" width="35px" title="Заблокировать" @click="block" /> Активен</td>' +
+        '<td v-else><img src="/img/block.png" width="35px" title="Разблокировать" @click="block" /> Заблокирован</td>' +
         '<td v-if="!show">' +
         '<img src="/img/edit.png" width="35px" title="Изменить" @click="edit" />' +
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
-        '<img  v-if="phone.active" src="/img/block.png" width="35px" title="Заблокировать" @click="block" />' +
-        '<img src="/img/unblock.png" v-else width="35px" title="Разблокировать" @click="block" />' +
         '</td>' +
         '<td v-if="show">' +
         '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" /></p>' +
@@ -582,8 +581,6 @@ Vue.component('add-phone', {
                         this.errors.push("Такой login существует!")
                         document.getElementById('username').focus()
                         document.getElementById('username').style.backgroundColor = "#FF0000"
-                        this.oldPassword = ''
-                        this.newPassword = ''
                     })
                     return true;
                 }
@@ -612,11 +609,11 @@ Vue.component('phones-list', {
         '<img @click="sortParam=\'phoneNumberDown\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сортировать по порядку"/>' +
         '<img @click="sortParam=\'phoneNumberUp\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сортировать в обратном порядке"/> ' +
         '</th>' +
-        '<th width="19%">Статус ' +
+        '<th width="24%">Статус ' +
         '<img @click="sortParam=\'activeUp\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сначала активные"/>' +
         '<img @click="sortParam=\'activeDown\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сначала заблокированные"/> ' +
         '</th>' +
-        '<th width="15%">Действия</th>' +
+        '<th width="10%">Действия</th>' +
         '</thead>' +
         '<tbody>' +
         '<tr is="phone-row" v-for="phone in filteredList" :key="phone.id" :phone="phone" ' +
@@ -769,10 +766,10 @@ Vue.component('users-list', {
         checkForm: function (e) {
             this.errors = [];
             if (!this.oldPassword) {
-                this.errors.push('Укажите login.');
+                this.errors.push('Укажите действующий пароль.');
             }
             if (!this.newPassword) {
-                this.errors.push('Укажите пароль.');
+                this.errors.push('Укажите новый пароль.');
             }
             if (this.oldPassword === '' || this.newPassword === '') {
                 if (this.oldPassword === '') {
@@ -791,20 +788,21 @@ Vue.component('users-list', {
                     oldPassword: this.oldPassword,
                     newPassword: this.newPassword
                 }
-                UserApi.update({id: this.id}, user).then(result =>
+                UserApi.update({id: this.id}, user).then(result => {
+                    if(result.body){
                     result.json().then(data => {
                         var index = getIndex(this.userPhone, data.id);
                         this.userPhone.splice(index, 1, data);
                         this.$router.push({path: '/'})
                         alert("Пароль успешно изменен! Авторизируйтесь используя новый пароль.")
-                    })
-                ).catch(error => {
-                    this.pass = true
-                    document.getElementById('oldPassword').focus()
-                    document.getElementById('oldPassword').style.backgroundColor = "#FF0000"
-                    this.oldPassword = ''
-                    this.newPassword = ''
-                })
+                    })} else {
+                        this.pass = true
+                        document.getElementById('oldPassword').focus()
+                        document.getElementById('oldPassword').style.backgroundColor = "#FF0000"
+                        this.oldPassword = ''
+                        this.newPassword = ''
+                    }
+            })
                 return true;
             }
             e.preventDefault();
@@ -995,7 +993,9 @@ const Main = {
     template: '<div><header-form/>' +
         '<hr class="tab">' +
         '<br>' +
-        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/#/registration\'">Присоедениться к нам!</button>' +
+        '<div style="text-align: center">' +
+            '<button style="margin: 0px 10px" class="registration" onclick="location.href = \'/?#/registration\'">Присоедениться к нам!</button>' +
+        '</div>' +
         '<img src="/img/1.png" width="100%"/>' +
         '<br>' +
         '<img src="/img/2.png" width="100%"/>' +
@@ -1164,13 +1164,16 @@ const Registration = {
             phoneNumber: '',
             email: '',
             phones: [],
-            errors: []
+            errors: [],
+            show: true,
+            currentTime: 5,
+            timer: null
         }
     },
     template: '<div><header-form/>' +
         '<hr class="tab">' +
         '<br>' +
-        '<form @submit="checkForm" action="/" novalidate="true">' +
+        '<form v-if="show" @submit="checkForm" novalidate="true">' +
         ' <p v-if="errors.length">' +
         '    <b>Заполните корректно поля:</b>' +
         '    <ul>' +
@@ -1198,11 +1201,20 @@ const Registration = {
         ' @keypress="isNumber($event)" maxlength="12"/></td>' +
         '</tr>' +
         '<tr>' +
-        '<td width="50%" colspan="2" align="center"><button class="button" >Сохранить</button></td>' +
+        '<td width="50%" colspan="4" align="center"><button class="button" >Присоедениться</button></td>' +
         '</tr>' +
         '</table>' +
         '</form>' +
+        '<div v-if="!show">' +
+        '<h2 style="color: greenyellow">Ваш профиль успешно создан!</h2>' +
+        '<h2 style="color: greenyellow">Вам на email отправлено письмо для подтверждения регестрации.</h2>' +
+        '<h3>Автоматический переход через {{ currentTime }} сек.</h3>' +
+        '<div style="text-align: center"><a style="color: whitesmoke" href="/">Перейти сейчас...</a></div>' +
+        '</div>' +
         '<footer-form/></div>',
+    destroyed() {
+        this.stopTimer()
+    },
     methods: {
         isNumber: function(evt) {
             evt = (evt) ? evt : window.event;
@@ -1234,6 +1246,7 @@ const Registration = {
                 this.errors.push('Укажите электронную почту.');
             } else if (!this.validEmail(this.email)) {
                 this.errors.push('Укажите корректный адрес электронной почты.');
+                document.getElementById('email').style.backgroundColor = "#FF0000"
             }
             if (this.username === '' || this.password === '' || this.address === ''
                 || this.fullName === '' || this.phoneNumber === '' || this.email === '') {
@@ -1288,9 +1301,15 @@ const Registration = {
                             this.address = ''
                             this.phoneNumber = ''
                             this.email = ''
+                            this.startTimer()
+                            this.show = false
                         }
                     )
-                )
+                ).catch(error => {
+                    this.errors.push("Такой login существует!")
+                    document.getElementById('username').focus()
+                    document.getElementById('username').style.backgroundColor = "#FF0000"
+                })
                 return true;
             }
             e.preventDefault();
@@ -1298,6 +1317,79 @@ const Registration = {
         validEmail: function (email) {
             var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return re.test(email);
+        },
+        startTimer() {
+            this.timer = setInterval(() => {
+                this.currentTime--
+            }, 1000)
+        },
+        stopTimer() {
+            clearTimeout(this.timer)
+        }
+    },
+    watch: {
+        currentTime(time) {
+            if (time === 0) {
+                this.$router.push("/")
+                this.stopTimer()
+            }
+        }
+    }
+}
+
+const ActivateCode = {
+    data: function() {
+        return{
+            code: this.$route.params.code,
+            activate: false,
+            currentTime: 5,
+            timer: null,
+        }
+    },
+    template:
+        '<div>' +
+            '<header-form/>' +
+            '<hr class="tab">' +
+            '<div v-if="activate">' +
+                '<h2 style="color: greenyellow">Ваш профиль успешно активирован!</h2>' +
+                '<h3>Автоматический переход через {{ currentTime }} сек.</h3>' +
+                '<div style="text-align: center"><a style="color: whitesmoke" href="/">Перейти сейчас...</a></div>' +
+            '</div>' +
+            '<div v-else>' +
+                '<h2 style="color: red">Ошибка, такой страницы не сутществует!</h2>' +
+                '<h3>Автоматический переход через {{ currentTime }} сек.</h3>' +
+                '<div style="text-align: center"><a style="color: whitesmoke" href="/">Перейти сейчас...</a></div>' +
+            '</div>' +
+            '<br>' +
+            '<br>' +
+        '</div>',
+    beforeMount: function () {
+        ActivateCodeApi.get({code: this.code}).then(response => {
+            this.activate = response.body;
+        });
+    },
+    mounted() {
+        this.startTimer()
+    },
+    destroyed() {
+        this.stopTimer()
+    },
+    methods: {
+        startTimer() {
+            this.timer = setInterval(() => {
+                this.currentTime--
+            }, 1000)
+        },
+        stopTimer() {
+            clearTimeout(this.timer)
+        },
+    },
+    watch: {
+        currentTime(time) {
+            if (time === 0) {
+                this.$router.push("/")
+                this.stopTimer()
+            }
         }
     }
 }
@@ -1312,7 +1404,8 @@ const router = new VueRouter({
         { path: '/user', component: User },
         { path: '/user/service', component: UserService },
         { path: '/user/journal', component: UserJournal },
-        { path: '/registration', component: Registration }
+        { path: '/registration', component: Registration },
+        { path: '/activate/:code', component: ActivateCode }
     ]
 })
 

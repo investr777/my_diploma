@@ -35,7 +35,7 @@ public class UserAndPhoneUserController {
 
     @ApiOperation(value = "Edit password of the user", response = User.class)
     @RequestMapping(method = RequestMethod.PUT)
-    public User editPasswordUser(@AuthenticationPrincipal User user, @RequestBody UserEditPassword editPassword) throws Exception {
+    public boolean editPasswordUser(@AuthenticationPrincipal User user, @RequestBody UserEditPassword editPassword) throws Exception {
         return userService.updateUserPassword(editPassword.getNewPassword(), editPassword.getOldPassword(), user.getId());
     }
 }
