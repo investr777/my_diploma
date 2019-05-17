@@ -214,3 +214,27 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
+
+select {
+  margin: 5px;
+  width: 150px;
+  padding: 5px 35px 5px 5px;
+  font-size: 20px;
+  border: 1px solid #ccc;
+  height: 34px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: no-repeat #eee;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+@media screen and (min-width:0\0) {
+  select {
+    background:none\9;
+    padding: 5px\9;
+  }
+}

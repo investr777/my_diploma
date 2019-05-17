@@ -41,11 +41,14 @@ public class PhoneService {
 
     public Phone updateDataPhone(Phone phone, Long phoneId) {
         Phone phoneFromDB = phoneRepository.findPhoneById(phoneId);
-        if (phoneFromDB == null){
+        if (phoneFromDB == null) {
             return null;
         }
-        if (phone.getPhoneNumber() != null){
+        if (phone.getPhoneNumber() != null) {
             phoneFromDB.setPhoneNumber(phone.getPhoneNumber());
+        }
+        if (phone.getUser() != null){
+            phoneFromDB.setUser(phone.getUser());
         }
         return phoneRepository.save(phoneFromDB);
     }
@@ -69,5 +72,9 @@ public class PhoneService {
 
     public Phone getPhoneByUserId(Long userId) {
         return phoneRepository.findPhoneByUserId(userId);
+    }
+
+    public List<Phone> findAll() {
+        return phoneRepository.findAll();
     }
 }

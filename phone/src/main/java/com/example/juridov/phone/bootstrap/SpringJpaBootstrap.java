@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 @Component
@@ -154,5 +152,20 @@ public class SpringJpaBootstrap implements ApplicationListener<ContextRefreshedE
         servicePhone3.setPhone(phone2);
         servicePhone3.setService(service3);
         servicePhoneRepository.save(servicePhone3);
+
+        //Add first available phone
+        Phone phone4 = new Phone();
+        phone4.setPhoneNumber("126534");
+        phoneRepository.save(phone4);
+
+        //Add first available phone
+        Phone phone5 = new Phone();
+        phone5.setPhoneNumber("228734");
+        phoneRepository.save(phone5);
+
+        //Add first available phone
+        Phone phone6 = new Phone();
+        phone6.setPhoneNumber("908745");
+        phoneRepository.save(phone6);
     }
 }

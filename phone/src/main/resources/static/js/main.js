@@ -9,6 +9,7 @@ function getIndex(list, id) {
 
 var RegistrationApi = Vue.resource('/registration')
 var ActivateCodeApi = Vue.resource('/activate{/code}')
+var AvailablePhonesApi = Vue.resource('/phones')
 
 var AdminApi = Vue.resource('/admin{/id}')
 var ServiceAdminApi = Vue.resource('/admin/service{/id}')
@@ -467,6 +468,7 @@ Vue.component('add-phone', {
         '<button style="margin: 0px 10px" class="button" @click="show = true">Добавить абонента</button>' +
         '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/service\'">Сервисы</button>' +
         '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/journal\'">Неоплаченные счета</button>' +
+        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/available\'">Номера для свободной регестрации</button>' +
         '</div>' +
         '<form @submit="checkForm" novalidate="true">' +
         ' <p v-if="errors.length">' +
@@ -566,7 +568,7 @@ Vue.component('add-phone', {
                             active: true
                         }
                     };
-                    RegistrationApi.save({}, phone).then(result =>
+                    AdminApi.save({}, phone).then(result =>
                         result.json().then(data => {
                                 this.phones.push(data)
                                 this.username = ''
@@ -691,6 +693,120 @@ Vue.component('phones-list', {
             }
         }
 });
+
+
+
+Vue.component('availablePhone-row', {
+    props: ['phone', 'preloaderVisibility'],
+    data: function() {
+        return {
+            phoneNumber: '',
+            show: this.preloaderVisibility
+        }
+    },
+    template:
+        '<tr>' +
+        '<td>{{phone.phoneNumber}}</td>' +
+        '</tr>',
+})
+
+Vue.component('add-available-phone', {
+    props:['availablePhones', 'preloaderVisibility', 'phones'],
+    data: function() {
+        return {
+            id: '',
+            phoneNumber: '',
+            show: this.preloaderVisibility,
+            errors: [],
+        }
+    },
+    template:
+        '<div>' +
+        '<div v-if="!show" style="padding: 2%">' +
+        '<div align="center"><button class="button" @click="show = true">Добавить номер для свободного подключения</button></div>' +
+        '</div>' +
+        '<form @submit="checkForm" novalidate="true">' +
+        ' <p v-if="errors.length">' +
+        '    <b>Заполните корректно поля:</b>' +
+        '    <ul>' +
+        '      <li v-for="error in errors">{{ error }}</li>' +
+        '    </ul>' +
+        '  </p>' +
+        '<table v-if="show">' +
+        '<tr>' +
+        '<td width="15%">Телефонный номер: </td>' +
+        '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
+        ' @keypress="isNumber($event)" maxlength="12"/></td>' +
+        '<td width="50%" colspan="2" align="center"><button class="button">Добавить</button></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>',
+    methods: {
+        isNumber: function(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
+        checkForm: function (e) {
+            this.errors = [];
+            if (!this.phoneNumber) {
+                this.errors.push('Укажите номер.');
+            }
+            if (this.phoneNumber === '') {
+                if (this.phoneNumber === '') {
+                    document.getElementById('phoneNumber').style.backgroundColor = "#FF0000"
+                } else {
+                    document.getElementById('phoneNumber').style.backgroundColor = "#ffffff"
+                }
+            }
+            if(this.phones.some(phone => phone.phoneNumber==this.phoneNumber)){
+                this.errors.push("Такой телефонный номер существует!")
+            } else {
+                if (!this.errors.length) {
+                    var phone = {
+                        phoneNumber: this.phoneNumber,
+                    };
+                    Vue.resource('/admin/newPhone').save({}, phone).then(result =>
+                        result.json().then(data => {
+                                this.availablePhones.push(data)
+                                this.phoneNumber = ''
+                                this.show = false
+                            }
+                        )
+                    )
+                }
+            }
+            e.preventDefault();
+        }
+    }
+})
+
+Vue.component('available-phones-list',{
+    props: ['availablePhones', 'phones'],
+    data: function() {
+        return {
+            preloaderVisibility: false,
+        }
+    },
+    template:
+        '<div>'+
+        '<add-available-phone :availablePhones="availablePhones" :phones="phones" :preloaderVisibility="preloaderVisibility"/><br>' +
+        '<table style="width: 40%">' +
+        '<thead>' +
+        '<th>Телефоны для свободного подключения абонентов</th>' +
+        '</thead>' +
+        '<tbody>' +
+        '<tr style="text-align: center" is="availablePhone-row" v-for="phone in availablePhones" :key="phone.id"' +
+        ':phone="phone" :preloaderVisibility="preloaderVisibility"></tr>' +
+        '</tbody>' +
+        '</table>' +
+        '</div>',
+})
 
 
 
@@ -1113,7 +1229,33 @@ const Admin = {
     created: function () {
         AdminApi.get().then(result =>
             result.json().then(data =>
-                data.forEach(phone => this.phones.push(phone))))
+                data.forEach(phone => {
+                    if (phone.user !== null) {
+                        this.phones.push(phone)
+                    }
+                })))
+    }
+}
+
+const NewAvailablePhone = {
+    template: '<div><header-form-admin/>' +
+        '<hr class="tab">' +
+        '<br>' +
+        '<available-phones-list :availablePhones="availablePhones" :phones="phones"/>' +
+        '<footer-form/></div>',
+    data: function() {
+        return {
+            availablePhones: [],
+            phones: []
+        }
+    },
+    created: function(){
+        AvailablePhonesApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(phone => this.availablePhones.push(phone))))
+        AdminApi.get().then(result =>
+            result.json().then(data => {
+                data.forEach(phone => this.phones.push(phone))}))
     }
 }
 
@@ -1167,7 +1309,8 @@ const Registration = {
             errors: [],
             show: true,
             currentTime: 5,
-            timer: null
+            timer: null,
+            availablePhones: []
         }
     },
     template: '<div><header-form/>' +
@@ -1197,8 +1340,11 @@ const Registration = {
         '<td width="15%">Email</td>' +
         '<td width="35%"><input id="email" type="text" placeholder="Email" v-model="email"/></td>' +
         '<td width="15%">Телефонный номер: </td>' +
-        '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
-        ' @keypress="isNumber($event)" maxlength="12"/></td>' +
+        '<td width="35%">' +
+            '<select id="phoneNumber" v-model="phoneNumber">' +
+                ' <option v-for="phone in availablePhones" v-bind:value="phone">{{phone.phoneNumber}}</option>' +
+            '</select>' +
+        '</td>' +
         '</tr>' +
         '<tr>' +
         '<td width="50%" colspan="4" align="center"><button class="button" >Присоедениться</button></td>' +
@@ -1212,6 +1358,11 @@ const Registration = {
         '<div style="text-align: center"><a style="color: whitesmoke" href="/">Перейти сейчас...</a></div>' +
         '</div>' +
         '<footer-form/></div>',
+    created: function(){
+        AvailablePhonesApi.get().then(result =>
+            result.json().then(data =>
+                data.forEach(phone => this.availablePhones.push(phone))))
+    },
     destroyed() {
         this.stopTimer()
     },
@@ -1283,7 +1434,8 @@ const Registration = {
             }
             if (!this.errors.length) {
                 var phone = {
-                    phoneNumber: this.phoneNumber,
+                    id: this.phoneNumber.id,
+                    phoneNumber: this.phoneNumber.phoneNumber,
                     user: {
                         username: this.username,
                         password: this.password,
@@ -1294,13 +1446,14 @@ const Registration = {
                 };
                 RegistrationApi.save({}, phone).then(result =>
                     result.json().then(data => {
-                            this.phones.push(data)
+                        this.phones.push(data)
                             this.username = ''
                             this.password = ''
                             this.fullName = ''
                             this.address = ''
                             this.phoneNumber = ''
                             this.email = ''
+                            this.id = ''
                             this.startTimer()
                             this.show = false
                         }
@@ -1395,10 +1548,10 @@ const ActivateCode = {
 }
 
 const router = new VueRouter({
-    // mode: 'history',
     routes: [
         { path: '/', component: Main },
         { path: '/admin', component: Admin },
+        { path: '/admin/available', component: NewAvailablePhone },
         { path: '/admin/service', component: AdminService },
         { path: '/admin/journal', component: AdminJournalsWithoutPaid },
         { path: '/user', component: User },

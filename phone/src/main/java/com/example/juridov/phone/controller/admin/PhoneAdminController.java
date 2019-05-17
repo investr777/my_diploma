@@ -44,7 +44,8 @@ public class PhoneAdminController {
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
     public Phone EditSubscriberWithPhone(@RequestBody Phone phone, @PathVariable Long id) {
         userService.updateDataUser(phone.getUser(), phoneService.findPhoneById(id).getUser().getId());
-        return phoneService.updateDataPhone(phone, id);
+//        return phoneService.updateDataPhone(phone, id);
+        return null;
     }
 
     @ApiOperation(value = "Block phone or Active phone", response = Phone.class)
@@ -65,4 +66,9 @@ public class PhoneAdminController {
         phoneService.deletePhoneNumber(id);
     }
 
+    @ApiOperation(value = "Create a new available phone number", response = Phone.class)
+    @PostMapping("/newPhone")
+    public Phone addNewPhone(@RequestBody Phone phone) {
+        return phoneService.addPhoneNumber(phone);
+    }
 }
