@@ -97,10 +97,18 @@ Vue.component('service-row', {
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
         '</td>' +
         '<td v-if="show">' +
-        '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" /></p>' +
+        '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" />' +
+        '<img src="/img/cancel.png" width="35px" title="Отменить" @click="cancel" /></p>' +
         '</td>' +
         '</tr>',
     methods: {
+        cancel: function(){
+            this.id = ''
+            this.name = ''
+            this.description = ''
+            this.price = ''
+            this.show = false
+        },
         isDouble: function(evt) {
             evt = (evt) ? evt : window.event;
             var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -186,7 +194,7 @@ Vue.component('add-service', {
     template:
         '<div>' +
         '<div v-if="!show" style="padding: 2%">' +
-        '<button class="button" @click="show = true">Добавить сервис</button>' +
+        '<div align="center"><button class="button" @click="show = true">Добавить сервис</button></div>' +
         '</div>' +
         '<form @submit="checkForm" novalidate="true">' +
         ' <p v-if="errors.length">' +
@@ -204,13 +212,22 @@ Vue.component('add-service', {
         '</tr>' +
         '<tr>' +
         '<td>Описание: </td>' +
-        '<td colspan="2"><input id="description" type="text" placeholder="Description" v-model="description"/></td>' +
-        '<td align="center"><button class="button">Сохранить</button></td>' +
+        '<td><input id="description" type="text" placeholder="Description" v-model="description"/></td>' +
+        '<td colspan="2" align="center">' +
+            '<button style="margin: 0px 30px" class="button">Добавить</button>' +
+            '<button @click="cancel" class="button1">Отменить</button>' +
+        '</td>' +
         '</tr>' +
         '</table>' +
         '</form>' +
         '</div>',
     methods: {
+        cancel: function(){
+            this.name = ''
+            this.description = ''
+            this.price = ''
+            this.show = false
+        },
         isDouble: function(evt) {
             evt = (evt) ? evt : window.event;
             var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -369,10 +386,18 @@ Vue.component('phone-row', {
         '<img src="/img/del.png" width="35px" title="Удалить" @click="del" />' +
         '</td>' +
         '<td v-if="show">' +
-        '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" /></p>' +
+        '<p style="text-align: center"><img src="/img/save.png" width="35px" title="Сохранить" @click="save" />' +
+        '<img src="/img/cancel.png" width="35px" title="Отменить" @click="cancel" /></p>' +
         '</td>' +
         '</tr>',
     methods: {
+        cancel: function(){
+            this.id = ''
+            this.fullName = ''
+            this.address = ''
+            this.phoneNumber = ''
+            this.show = false
+        },
         isNumber: function(evt) {
             evt = (evt) ? evt : window.event;
             var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -425,23 +450,28 @@ Vue.component('phone-row', {
                     document.getElementById('phoneNumberEdit').style.backgroundColor = "#ffffff"
                 }
             } else {
-            var phone = {
-                phoneNumber: this.phoneNumber,
-                user: {
-                    fullName: this.fullName,
-                    address: this.address
-                }
-            };
-            AdminApi.update({id: this.id}, phone).then(result =>
-                result.json().then(data => {
-                    var index = getIndex(this.phones, data.id);
-                    this.phones.splice(index,1,data);
-                    this.id = ''
-                    this.fullName = ''
-                    this.address = ''
-                    this.phoneNumber = ''
-                    this.show = false
-                }))
+                if (this.phones.some(phone => phone.phoneNumber == this.phoneNumber)) {
+                    document.getElementById('phoneNumberEdit').style.backgroundColor = "#FF0000"
+                    alert("Указанный телефон существует!")
+                } else {
+                var phone = {
+                    phoneNumber: this.phoneNumber,
+                    user: {
+                        fullName: this.fullName,
+                        address: this.address
+                    }
+                };
+                AdminApi.update({id: this.id}, phone).then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.phones, data.id);
+                        this.phones.splice(index, 1, data);
+                        this.id = ''
+                        this.fullName = ''
+                        this.address = ''
+                        this.phoneNumber = ''
+                        this.show = false
+                    }))
+            }
         }
         }
     }
@@ -468,7 +498,7 @@ Vue.component('add-phone', {
         '<button style="margin: 0px 10px" class="button" @click="show = true">Добавить абонента</button>' +
         '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/service\'">Сервисы</button>' +
         '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/journal\'">Неоплаченные счета</button>' +
-        '<button style="margin: 0px 10px" class="button" onclick="location.href = \'/?#/admin/available\'">Номера для свободной регестрации</button>' +
+        '<button style="margin: 0px 10px; width: 200px" class="button" onclick="location.href = \'/?#/admin/available\'">Номера для свободной регестрации</button>' +
         '</div>' +
         '<form @submit="checkForm" novalidate="true">' +
         ' <p v-if="errors.length">' +
@@ -494,12 +524,23 @@ Vue.component('add-phone', {
         '<td width="15%">Телефонный номер: </td>' +
         '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
         ' @keypress="isNumber($event)" maxlength="12"/></td>' +
-        '<td width="50%" colspan="2" align="center"><button class="button">Сохранить</button></td>' +
+        '<td width="50%" colspan="2" align="center">' +
+            '<button style="margin: 0px 30px" class="button">Добавить</button>' +
+            '<button @click="cancel" class="button1">Отменить</button>' +
+        '</td>' +
         '</tr>' +
         '</table>' +
         '</form>' +
         '</div>',
     methods: {
+        cancel: function(){
+            this.username = ''
+            this.password = ''
+            this.fullName = ''
+            this.address = ''
+            this.phoneNumber = ''
+            this.show = false
+        },
         isNumber: function(evt) {
             evt = (evt) ? evt : window.event;
             var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -606,7 +647,7 @@ Vue.component('phones-list', {
         '<img @click="sortParam=\'fullNameDown\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сортировать по порядку"/>' +
         '<img @click="sortParam=\'fullNameUp\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сортировать в обратном порядке"/> ' +
         '<input style="width: 80%" type="text" v-model="fullName"/></th>' +
-        '<th width="29%">Адрес</th>' +
+        '<th width="27%">Адрес</th>' +
         '<th width="15%">Номер телефона ' +
         '<img @click="sortParam=\'phoneNumberDown\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сортировать по порядку"/>' +
         '<img @click="sortParam=\'phoneNumberUp\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сортировать в обратном порядке"/> ' +
@@ -615,10 +656,10 @@ Vue.component('phones-list', {
         '<img @click="sortParam=\'activeUp\'" style="cursor: pointer" width="20px" src="/img/down.png" title="Сначала активные"/>' +
         '<img @click="sortParam=\'activeDown\'" style="cursor: pointer" width="20px" src="/img/up.png" title="Сначала заблокированные"/> ' +
         '</th>' +
-        '<th width="10%">Действия</th>' +
+        '<th width="12%">Действия</th>' +
         '</thead>' +
         '<tbody>' +
-        '<tr is="phone-row" v-for="phone in filteredList" :key="phone.id" :phone="phone" ' +
+        '<tr is="phone-row" v-for="phone in filteredList" v-if="phone.user!==null" :key="phone.id" :phone="phone" ' +
         ':phones="phones" :preloaderVisibility="preloaderVisibility"></tr>' +
         '</tbody>' +
         '</table>' +
@@ -737,12 +778,19 @@ Vue.component('add-available-phone', {
         '<td width="15%">Телефонный номер: </td>' +
         '<td width="35%"><input id="phoneNumber" type="text" placeholder="Phone number" v-model="phoneNumber"' +
         ' @keypress="isNumber($event)" maxlength="12"/></td>' +
-        '<td width="50%" colspan="2" align="center"><button class="button">Добавить</button></td>' +
+        '<td width="50%" colspan="2" align="center">' +
+        '<button style="margin: 0px 30px" class="button">Добавить</button>' +
+        '<button @click="cancel" class="button1">Отменить</button>' +
+        '</td>' +
         '</tr>' +
         '</table>' +
         '</form>' +
         '</div>',
     methods: {
+        cancel: function(){
+            this.phoneNumber = ''
+            this.show = false
+        },
         isNumber: function(evt) {
             evt = (evt) ? evt : window.event;
             var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -856,6 +904,7 @@ Vue.component('users-list', {
                 '<label> Новый пароль: </label>' +
                 '<input id="newPassword" type="password" placeholder="New password" v-model="newPassword" />' +
                 '<button style="margin: 0px 10px" class="button">Сохранить</button>' +
+                '<button @click="cancel" style="margin: 0px 10px" class="button1">Отменить</button>' +
             '</div>' +
             '</form>' +
             '<table>' +
@@ -875,6 +924,11 @@ Vue.component('users-list', {
         '</div>' +
         '</div>',
     methods: {
+        cancel: function(){
+            this.show = false
+            this.oldPassword = ''
+            this.newPassword = ''
+        },
         edit: function() {
             this.show = true;
             this.id = this.userPhone[0].user.id
@@ -1230,9 +1284,7 @@ const Admin = {
         AdminApi.get().then(result =>
             result.json().then(data =>
                 data.forEach(phone => {
-                    if (phone.user !== null) {
                         this.phones.push(phone)
-                    }
                 })))
     }
 }
