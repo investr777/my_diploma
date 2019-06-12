@@ -45,8 +45,8 @@ public class UserService implements UserDetailsService {
                     user.getFullName(),
                     user.getActivationCode()
             );
-            System.out.println(message);
-//            mailSender.send(user.getEmail(), "Activation code", message);
+//            System.out.println(message);
+            mailSender.send(user.getEmail(), "Activation code", message);
         }
         return userRepository.save(user);
     }

@@ -1305,7 +1305,9 @@ const Admin = {
         AdminApi.get().then(result =>
             result.json().then(data =>
                 data.forEach(phone => {
+                    if (phone.user !== null) {
                         this.phones.push(phone)
+                    }
                 })))
     }
 }
